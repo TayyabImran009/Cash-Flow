@@ -6,6 +6,15 @@ const todayBtn = document.getElementById('today-btn');
 const calendar_bill_list = document.getElementById('calendar-bill-list');
 let billsIncomeList = JSON.parse(localStorage.getItem("billsIncomeList")) || [];
 
+function reRenderCalendar() {
+    billsIncomeList = JSON.parse(localStorage.getItem("billsIncomeList")) || [];
+    
+    date = new Date();
+    currentMonth = date.getMonth();
+    currentYear = date.getFullYear();
+    displayCalendar(currentMonth, currentYear);
+}
+
 const months = [
     "January", "February", "March", "April", "May", "June",
     "July", "August", "September", "October", "November", "December"

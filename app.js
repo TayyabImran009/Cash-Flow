@@ -154,6 +154,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
         if (sectionId === "history") {
             updateHistoryList(); // Update history when this tab is opened
+        } else if (sectionId === "calendar") {
+            reRenderCalendar();
         }
     }
 
@@ -298,6 +300,8 @@ document.addEventListener("DOMContentLoaded", function () {
         // If the history section is selected, refresh the history list
         if (sectionId === "history") {
             updateHistoryList();  // Only update history if switching to the history tab
+        }else if (sectionId === "calendar") {
+            reRenderCalendar();
         }
     }
 
@@ -426,7 +430,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 nextDate = getNextOccurrenceDate(nextDate, item.frequency, item.form_selected_date);
             }
         });
-        
+
         // Sort the occurrences by date
         allOccurrences.sort((a, b) => a.date - b.date);
 
@@ -467,7 +471,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
             // Check if the item falls within the forecast period
 
-            
+
 
             if (itemDate >= startDate && itemDate <= endDate) {
                 const itemAmount = item.type === "income" ? item.amount : -item.amount;
@@ -829,34 +833,34 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
     window.markAsUnpaid = function (id, occurrenceId, itemElement) {
-    
+
         console.log("Found element:", itemElement);
-    
+
         // Add the animation class to the item (optional)
         itemElement.classList.add('slide-out');
-    
+
         // Delay the actual data changes to allow the animation to finish
         setTimeout(() => {
             // Find the original item by its id in the billsIncomeList
-            console.log(billsIncomeList,"billsIncomeList")
+            console.log(billsIncomeList, "billsIncomeList")
             const originalIndex = billsIncomeList.findIndex(item => item.id === id);
 
-            console.log(originalIndex,"originalIndex")
+            console.log(originalIndex, "originalIndex")
             if (originalIndex === -1) return;
-    
+
             const originalItem = billsIncomeList[originalIndex];
-            
-            console.log(originalItem,"originalItem")
+
+            console.log(originalItem, "originalItem")
             // Find the modified occurrence by occurrenceId
             const modifiedIndex = modifiedOccurrences.findIndex(mod => mod.id === id);
             let occurrence = originalItem;
-            
-            console.log(modifiedIndex,"modifiedIndex")
+
+            console.log(modifiedIndex, "modifiedIndex")
 
             if (modifiedIndex > -1) {
                 occurrence = modifiedOccurrences[modifiedIndex];
             }
-    
+
             // Reverse the balance adjustment
             if (occurrence.type === "bill") {
                 balance += occurrence.amount; // Add the bill amount back
@@ -864,16 +868,16 @@ document.addEventListener("DOMContentLoaded", function () {
                 balance -= occurrence.amount; // Subtract the income amount
             }
 
-            console.log(occurrence,"occurrence")
+            console.log(occurrence, "occurrence")
             // Remove the occurrenceId from the paid array in the original item
-            console.log(occurrenceId,"occurrenceId")
-            console.log(originalItem.paid,"originalItem.paid")
+            console.log(occurrenceId, "occurrenceId")
+            console.log(originalItem.paid, "originalItem.paid")
             if (originalItem.paid) {
                 originalItem.paid = originalItem.paid.filter(paidId => paidId != occurrenceId);
             }
 
-            console.log(originalItem.paid,"originalItem.paid")
-    
+            console.log(originalItem.paid, "originalItem.paid")
+
             // Update the modified occurrences if the item was modified
             if (modifiedIndex > -1) {
                 modifiedOccurrences[modifiedIndex].paid = false; // Mark it as unpaid
@@ -885,7 +889,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 paidOneTimePayments = paidOneTimePayments.filter(item => item.id !== id);
                 localStorage.setItem("paidOneTimePayments", JSON.stringify(paidOneTimePayments));
             }
-    
+
             // Save the changes back to localStorage
             saveData();
             balanceInput.value = balance.toFixed(2); // Update the displayed balance
@@ -894,9 +898,9 @@ document.addEventListener("DOMContentLoaded", function () {
             updateHistoryList();
         }, 600); // Delay matching the animation duration (if you have an animation)
     };
-    
-    
-    
+
+
+
 
 
 
@@ -981,24 +985,24 @@ document.addEventListener("DOMContentLoaded", function () {
         localStorage.setItem("set_forecast_period", forecast_period.value)
         updateForecastList()
     });
-    
+
 });
 
 
 
 function toggleForecastItemContainer(e) {
     document.querySelectorAll('input').forEach(element => {
-        element.addEventListener('click', function(event) {
+        element.addEventListener('click', function (event) {
             event.stopPropagation(); // Prevent the event from bubbling up to the parent div
         });
     });
 
-    if (e.tagName !== "INPUT" ) {
+    if (e.tagName !== "INPUT") {
         e.classList.toggle("forecast-item-container-activate");
     }
 }
 
-function toggleHistoryItemContainer(e){
+function toggleHistoryItemContainer(e) {
 
     e.classList.toggle("history-item-container-activate");
 }
