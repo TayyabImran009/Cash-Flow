@@ -114,6 +114,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
     function clearHistory() {
         if (confirm("Are you sure you want to clear the history? This action cannot be undone.")) {
+
+            let modifiedOccurrences = JSON.parse(localStorage.getItem("permanent_delete")) || [];
             // Clear all the paid statuses
             billsIncomeList.forEach(item => {
                 item.paid = [];
