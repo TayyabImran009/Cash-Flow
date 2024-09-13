@@ -1,0 +1,615 @@
+/* Global Styles */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #ffffff; /* White background */
+    color: #333333; /* Dark text color for readability */
+    margin: 0;
+    padding: 0;
+    font-weight: 400; /* Regular font weight for body text */
+    touch-action: manipulation; /* Prevent double-tap to zoom */
+    -webkit-user-select: none; /* Prevent text selection */
+    -webkit-touch-callout: none; /* Prevent callout, like copy/paste */
+}
+
+
+
+header {
+    background-color: #444444; /* Neutral dark grey for header background */
+    padding: 10px;
+    color: #ffffff; /* White text color */
+    text-align: center; /* Center align the text */
+}
+
+nav ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+}
+
+nav ul li {
+    margin: 0 15px;
+}
+
+nav ul li a {
+    color: #ffffff; /* White text color */
+    text-decoration: none;
+    font-weight: 600; /* Slightly bolder font weight for navigation */
+    font-size: 18px; /* Larger font size for visibility */
+}
+
+nav ul li a:hover {
+    text-decoration: underline;
+}
+
+main {
+    padding: 0;
+    max-width: 100%; /* Ensure the content takes the full width */
+    margin: 0; /* Remove auto margins to prevent extra space on mobile */
+    box-sizing: border-box; /* Ensure padding and border are included in width */
+}
+
+/* Section Styles */
+.section {
+    display: none;
+    margin-bottom: 40px; /* Add some space after each section */
+}
+
+.section.active {
+    display: block;
+}
+
+.section h2 {
+    padding-bottom: 5px;
+    margin-top: 0px;        /* Negative margin to move the heading up */
+    margin-bottom: 5px;
+    color: #444444;           /* Neutral dark grey for section headings */
+    text-align: center;       /* Center align section headings */
+    font-weight: 600;         /* Bolder font weight for section headings */
+    font-size: 1.2em;         /* Adjust the font size to be smaller */
+}
+
+/* Account Balance Styles */
+.checking-balance {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.checking-balance label {
+    font-size: 18px;
+    margin-right: 10px;
+    font-weight: 600; /* Bolder font weight for labels */
+}
+
+.checking-balance input {
+    width: 150px;
+    padding: 8px;
+    border-radius: 4px;
+    border: 1px solid #cccccc;
+    background-color: #f8f8f8;
+    color: #333333;
+    text-align: right;
+    font-size: 18px;
+    font-weight: 400; /* Regular font weight for input text */
+}
+
+/* Forecast Section */
+#forecast {
+    background-color: #f8f8f8; /* Light grey background */
+    padding: 10px; /* Reduce padding to maximize space */
+    border-radius: 8px;
+    border: 1px solid #cccccc;
+}
+
+#forecast-list {
+    margin-top: 20px;
+    padding: 0;
+}
+
+/* Styling for positive and negative balances */
+.forecast-item .balance-after.negative {
+    color: #ff0000; /* Red color for negative balances */
+}
+
+.forecast-item .balance-after.positive {
+    color: #28a745; /* Green color for positive balances */
+}
+
+/* Forecast Item Styles */
+.forecast-item {
+    margin: 0 0 15px 0; /* Add 15px margin at the bottom for spacing between items */
+    padding: 10px;
+    border-radius: 8px;
+    background-color: #ffffff; /* White background for forecast items */
+    color: #333333;
+    border: 1px solid #cccccc;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%; /* Ensure it takes up the full width */
+    box-sizing: border-box; /* Include padding and border in the width */
+}
+
+
+
+.forecast-item-container{    
+    display: flex;
+    flex-direction: row;
+    position: relative;
+}
+
+.forecast-item-container-contant{
+    width: 100%;
+    overflow: hidden;
+    transition: transform 0.4s ease; 
+}
+
+.forecast-item-container-activate {
+    transform: translateX(-107px); 
+}
+
+.action-buttons-container{
+    display: flex;
+    position: absolute;
+    right: -112px;
+    transition: right 0.4s ease, opacity 0.4s ease;
+}
+
+.action-buttons-container > button{
+    cursor: pointer;
+}
+
+.history-item-container{    
+    display: flex;
+    flex-direction: row;
+    position: relative;
+}
+
+.history-item-container-activate {
+    transform: translateX(-64px); 
+}
+
+.history-buttons-container{
+    display: flex;
+    position: absolute;
+    right: -64px;
+    transition: right 0.4s ease, opacity 0.4s ease;
+}
+
+.history-buttons-container > button{
+    cursor: pointer;
+}
+
+
+/* Color-coding for income and bills */
+.forecast-item.bill {
+    border-left: 5px solid #ff0000; /* Red border for bills */
+}
+
+.forecast-item.income {
+    border-left: 5px solid #28a745; /* Green border for income */
+}
+
+/* Row styling */
+.item-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+
+.top-row {
+    margin-bottom: 10px;
+    justify-content: space-around;
+}
+
+.bottom-row {
+    justify-content: space-around;
+}
+
+/* Centering within the rows */
+.item-row {
+    display: flex;
+    justify-content: space-between; /* Distribute space between items */
+    align-items: center;
+    width: 100%;
+}
+
+.item-row .day-of-week,
+.item-row .due-date {
+    flex: 1;
+    text-align: left; /* Left justify the day and due date */
+}
+
+.item-row .bill-name {
+    flex: 1;
+    text-align: center; /* Center the bill name */
+}
+
+.item-row .bill-amount,
+.item-row .running-balance {
+    flex: 1;
+    text-align: right; /* Right justify the bill amount and balance */
+}
+
+.bottom-row .paid-button {
+    margin: 0 auto; /* Center the button */
+    padding: 5px 10px;
+    background-color: #444444; /* Neutral dark grey for the button */
+    color: #ffffff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    text-align: center; /* Center the text inside the button */
+    font-weight: 600; /* Bolder font weight for the button text */
+}
+
+.bottom-row .paid-button:hover {
+    background-color: #333333; /* Slightly darker grey on hover */
+}
+
+.day-of-week,
+.due-date,
+.running-balance {
+    font-weight: 600; /* Bolder font weight */
+}
+
+.amount-input {
+    text-align: right; /* Right-justify the text */
+}
+
+.bill-amount {
+    font-weight: 600; /* Bolder font weight */
+    color: #000000; /* Black color for bill amounts */
+}
+
+/* Specific color for bill and income amounts */
+.forecast-item.bill .bill-amount {
+    color: #000000; /* Black color for bills */
+}
+
+.forecast-item.income .bill-amount {
+    color: #000000; /* Black color for income */
+}
+
+/* Running balance color for positive/negative */
+.running-balance.positive {
+    color: #28a745; /* Green for positive balance */
+}
+
+.running-balance.negative {
+    color: #ff0000; /* Red for negative balance */
+}
+
+.bill-name {
+    font-weight: 600; /* Bolder font weight for bill names */
+}
+
+/* Bills & Income Section */
+#bills-income {
+    background-color: #f8f8f8; /* Light grey background */
+    padding: 20px;
+    border-radius: 8px;
+    border: 1px solid #cccccc;
+}
+
+
+#bills-income-form {
+    margin-bottom: 20px;
+}
+
+#bills-income-form label {
+    display: block;
+    margin-bottom: 5px;
+    color: #333333;
+    font-weight: 600; /* Bolder font weight for form labels */
+}
+
+#bills-income-form input, 
+#bills-income-form select {
+    width: calc(100% - 22px); /* Ensure full width with padding */
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #cccccc; /* Light border color */
+    border-radius: 4px;
+    background-color: #ffffff;
+    color: #333333; /* Dark text color */
+    font-weight: 400; /* Regular font weight for form inputs */
+}
+
+#bills-income-form button {
+    width: 100%;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    background-color: #444444; /* Neutral dark grey for buttons */
+    color: #ffffff;
+    cursor: pointer;
+    font-size: 16px; /* Consistent button text size */
+    font-weight: 600; /* Bolder font weight for button text */
+}
+
+#bills-income-form button:hover {
+    background-color: #333333; /* Darker button color on hover */
+}
+
+#bills-list {
+    margin-top: 20px;
+}
+
+.bill-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px;
+    border: 1px solid #cccccc;
+    border-radius: 4px;
+    margin-bottom: 10px;
+    background-color: #ffffff; /* White background for items */
+    color: #333333; /* Default dark text color */
+    font-weight: 400;
+}
+
+.bill-item span {
+    flex: 1;
+    text-align: center; /* Center text within each section */
+}
+
+.bill-item span.bill {
+    color: #000000; /* Black for bills */
+}
+
+.bill-item span.income {
+    color: #28a745; /* Green color for income */
+    font-weight: bold; /* Make the income text bold for emphasis */
+}
+
+.bill-item button {
+    margin-left: 10px;
+    padding: 5px 10px;
+    border: none;
+    border-radius: 4px;
+    background-color: #dc3545; /* Danger button color */
+    color: #ffffff;
+    cursor: pointer;
+    font-size: 14px; /* Consistent button text size */
+    font-weight: 600; /* Bolder font weight for button text */
+}
+
+.bill-item button:hover {
+    background-color: #c82333; /* Darker danger color on hover */
+}
+
+/* Account Section */
+#account {
+    background-color: #f8f8f8; /* Light grey background */
+    padding: 20px;
+    border-radius: 8px;
+    border: 1px solid #cccccc;
+}
+
+#account p {
+    color: #333333; /* Dark text color */
+    font-weight: 400; /* Regular font weight for text */
+}
+
+#account button, 
+#account input[type="file"] {
+    width: 100%;
+    padding: 10px;
+    margin-top: 10px;
+    border-radius: 4px;
+    border: none;
+    background-color: #444444; /* Button color */
+    color: #ffffff;
+    cursor: pointer;
+    font-weight: 600; /* Bolder font weight for buttons */
+}
+
+#account button:hover {
+    background-color: #333333;
+}
+
+
+#forecast-controls {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+#forecast-controls button {
+    margin: 5px;
+    padding: 10px 20px;
+    background-color: #444444; /* Neutral dark grey */
+    color: #ffffff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+#forecast-controls button:hover {
+    background-color: #333333; /* Darker grey on hover */
+}
+
+/* General styling for income buttons or elements */
+.income-button {
+    background-color: #28a745; /* Green background for income buttons */
+    color: #ffffff;
+    border: none;
+    border-radius: 4px;
+    padding: 5px 10px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.income-button:hover {
+    background-color: #218838; /* Darker green on hover */
+}
+
+.forecast-item.hidden {
+    display: none;
+}
+
+.edit-button, .save-button {
+    margin-left: 10px;
+    padding: 5px 10px;
+    background-color: #444444; /* Neutral dark grey */
+    color: #ffffff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.save-button {
+    background-color: #28a745; /* Green color for save button */
+    padding: 5px 20px; /* Adjust padding to make the button wider */
+    color: #ffffff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 600;
+    margin-left: auto; /* Pushes the button to the right */
+    display: block; /* Ensures it behaves as a block-level element */
+}
+
+.due-tomorrow {
+    background-color: #fff8b3;
+}
+
+.due-today {
+    background-color: #ffe6e6;
+}
+
+.overdue {
+    background-color: #ffcccc; /* or another shade of red */
+}
+
+/* Center the button and make it look nicer */
+.clear-history-container {
+    text-align: center;
+    margin: 20px 0; /* Add space around the button */
+}
+
+#clear-history-btn {
+    background-color: #007bff; /* Nice blue color */
+    color: white; /* White text */
+    border: none;
+    padding: 10px 20px;
+    font-size: 16px;
+    border-radius: 5px;
+    cursor: pointer;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Add a subtle shadow */
+    transition: background-color 0.3s ease, transform 0.3s ease; /* Smooth transition */
+}
+
+#clear-history-btn:hover {
+    background-color: #0056b3; /* Darker blue on hover */
+    transform: translateY(-2px); /* Slight lift effect on hover */
+}
+
+#clear-history-btn:active {
+    transform: translateY(0); /* Remove lift effect when clicked */
+}
+
+.unpaid-button {
+    padding: 5px 10px;
+    background-color: #ff5c5c; /* Red background for Unpaid */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-left: 10px;
+}
+
+.unpaid-button:hover {
+    background-color: #ff2c2c; /* Darker red on hover */
+}
+
+#final-balance-display {
+    text-align: center;       /* Center the text */
+    font-size: 1.1em;         /* Make the "10 Year Balance" text smaller */
+    margin-top: 5px;          /* Space above the balance */
+    margin-bottom: 20px;      /* Space below the balance */
+    font-weight: bold;        /* Make "10 Year Balance" bold */
+    padding-bottom: 10px;     /* Space between text and bottom border */
+    border-bottom: 2px solid #444444; /* Darker border for section headings */
+}
+
+#final-balance-amount {
+    font-size: 1.1em;         /* Make the balance amount smaller */
+    font-weight: bold;        /* Make the balance amount bold */
+    padding-bottom: 10px;     /* Space between text and bottom border */
+    margin-bottom: 20px;      /* Space below the balance */
+    /* border-bottom: 2px solid #444444; /* Darker border for section headings */
+}
+
+.custom-dropdown {
+    padding: 10px;
+    font-size: 16px;
+    background-color: #f8f9fa; /* Light background */
+    border: 1px solid #ccc; /* Gray border */
+    border-radius: 5px; /* Rounded corners */
+    color: #333; /* Text color */
+    width: 85px; /* Reduced width */
+    appearance: none; /* Removes default dropdown arrow */
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMHB4IiBoZWlnaHQ9IjEwcHgiIHZpZXdCb3g9IjAgMCAxMCAxMCI+PHBvbHlnb24gcG9pbnRzPSIwLDBAMywzQDEwLDAiIHN0eWxlPSJmaWxsOiNjY2M7Ii8+PC9zdmc+');
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    background-size: 10px;
+    text-align: center; /* Center the text horizontally */
+    padding: 5px 10px; /* Adjust vertical padding for better centering */
+}
+
+.custom-dropdown:hover {
+    border-color: #888; /* Change border color on hover */
+}
+
+.custom-dropdown:focus {
+    outline: none;
+    border-color: #007bff; /* Blue border on focus */
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+}
+
+/* Add sliding animation */
+@keyframes slideOutLeft {
+    0% {
+        transform: translateX(0);
+        background-color: white;
+    }
+    100% {
+        transform: translateX(-100%);
+        background-color: #28a745; /* Green color */
+    }
+}
+
+/* Class for the sliding effect */
+.slide-out {
+    animation: slideOutLeft 0.6s ease forwards;
+}
+
+/* ******************* */
+
+
+
+
+/* .forecast-item .amount, .forecast-item .running-balance {
+    text-align: right;
+    flex-grow: 1;
+    margin-right: 15px; 
+    transition: transform 0.4s ease; 
+}
+
+.forecast-item.active .amount, .forecast-item.active .running-balance {
+    transform: translateX(-100px); 
+}
+
+.forecast-item .paid-button, .forecast-item .edit-button {
+    position: absolute;
+    right: -160px; 
+    opacity: 0;
+    transition: right 0.4s ease, opacity 0.4s ease;
+} */

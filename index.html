@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>CashFlow</title>
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="calendar.css">
+    <!-- Add the following meta tags for the icon -->
+    <link rel="icon" type="image/png" sizes="192x192" href="icon-192x192.png"> <!-- For Android devices -->
+    <link rel="icon" type="image/png" sizes="512x512" href="icon-512x512.png">
+    <!-- High-res icon for Android devices -->
+    <link rel="apple-touch-icon" sizes="180x180" href="icon-180x180.png">
+    <link rel="apple-touch-icon" sizes="2048x2048" href="icon-2048x2048.png">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#000000">
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-WQ90Y3GCD9"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+        gtag('config', 'G-WQ90Y3GCD9');
+    </script>
+
+    <style>
+        body {
+            touch-action: manipulation;
+            -webkit-user-select: none;
+            -webkit-touch-callout: none;
+        }
+    </style>
+    <script>
+        document.addEventListener('gesturestart', function (e) {
+            e.preventDefault();
+        });
+    </script>
+
+
+</head>
+
+<body>
+    <header>
+        <nav>
+            <ul>
+                <li><a href="#" id="forecast-link">Forecast</a></li>
+                <li><a href="#" id="bills-income-link">Bills</a></li>
+                <li><a href="#" id="history-link">History</a></li>
+                <li><a href="#" id="account-link">Account</a></li>
+                <li><a href="#" id="calendar-link">Calendar</a></li>
+            </ul>
+        </nav>
+    </header>
+
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const balanceInput = document.getElementById("balance-input");
+
+            balanceInput.addEventListener("keypress", function (event) {
+                if (event.key === "Enter") {
+                    event.preventDefault(); // Prevent form submission or any default action
+                    balanceInput.blur(); // Remove focus from the input field
+                }
+            });
+        });
+    </script>
+
+    <main>
+        <!-- Forecast Section -->
+        <section id="forecast" class="section">
+            <h2>Current Date - <span id="current-date"></span></h2>
+            <div id="final-balance-display">
+                <!-- <label for="forecast-period">Forecast Period:</label> -->
+                <select id="forecast-period" class="custom-dropdown">
+                    <option value=3 selected>3 Month</option>
+                    <option value=12>1 Year</option>
+                    <option value=36>3 Year</option>
+                    <option value=60>5 Year</option>
+                    <option value=120>10 Year</option>
+                </select>
+                <span class="balance-text">Forecast: <span id="final-balance-amount">$0.00</span>
+            </div>
+
+            <div class="checking-balance">
+                <label for="balance-input">Checking Balance: $</label>
+                <input type="number" id="balance-input" step="0.01">
+                <script>
+                    document.getElementById('balance-input').addEventListener('focus', function () {
+                        this.select();
+                    });
+                </script>
+            </div>
+
+            <div id="forecast-list">
+                <!-- Forecast items will be dynamically added here -->
+            </div>
+        </section>
+
+        <!-- Bills & Income Section -->
+        <section id="bills-income" class="section hidden">
+            <h2>Bills & Income</h2>
+            <form id="bills-income-form">
+                <input type="hidden" id="edit-index">
+                <label for="name">Name:</label>
+                <input type="text" id="name" required style="font-size: 20px; padding: 10px;">
+                <label for="amount">Amount:</label>
+                <input type="number" id="amount" step="0.01" required style="font-size: 20px; padding: 10px;">
+                <label for="date-due">Date Due:</label>
+                <input type="date" id="date-due" required style="font-size: 20px; padding: 10px;">
+
+                <label for="type">Type:</label>
+                <select id="type" style="font-size: 20px; padding: 10px;">
+                    <option value="bill">Bill</option>
+                    <option value="income">Income</option>
+                </select>
+                <label for="frequency">Frequency:</label>
+                <select id="frequency" style="font-size: 20px; padding: 10px;">
+                    <option value="monthly">Monthly</option>
+                    <option value="daily">Daily</option>
+                    <option value="weekly">Weekly</option>
+                    <option value="biweekly">Bi-Weekly</option>
+                    <option value="quarterly">Quarterly</option>
+                    <option value="yearly">Yearly</option>
+                    <option value="one-time">One-Time</option> <!-- Add this line -->
+                </select>
+
+                <button type="submit">Add/Update</button>
+            </form>
+            <div id="bills-list"></div>
+        </section>
+
+        <!-- History Section -->
+        <section id="history" class="section hidden">
+            <h2>History</h2>
+            <div class="clear-history-container">
+                <button id="clear-history-btn">Clear History</button>
+            </div>
+            <div id="history-list">
+                <!-- History items will be dynamically added here -->
+            </div>
+        </section>
+
+
+        <!-- Account Section -->
+        <section id="account" class="section hidden">
+            <h2>Account</h2>
+            <br>
+            <h3>Remember to backup your data. If you clear your browser data or cache it will clear the database.</h3>
+            <button id="backup-btn">Backup Data</button>
+            <input type="file" id="restore-input" accept=".json" style="width: 94%;">
+            <br>
+            <div id="restore-success-message" style="display: none; color: green; font-weight: bold; margin-top: 10px;">
+                Successful Restore!
+            </div>
+        </section>
+
+        <section id="calendar" class="section hidden">
+            <div class="calendar-container-wrapper">
+                <div class="calendar-container">
+                    <div class="header">
+                        <h1>Company Calendar</h1>
+                    </div>
+
+                    <div class="calendar-nav">
+                        <button id="prev-month">❮</button>
+                        <h2 id="month-year"></h2>
+                        <button id="next-month">❯</button>
+                        <button id="today-btn">Today</button>
+                    </div>
+
+                    <div class="calendar-grid">
+                        <div class="day-label">S</div>
+                        <div class="day-label">M</div>
+                        <div class="day-label">T</div>
+                        <div class="day-label">W</div>
+                        <div class="day-label">T</div>
+                        <div class="day-label">F</div>
+                        <div class="day-label">S</div>
+                        <div id="calendar-days" class="days"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+    <script src="app.js"></script>
+    <script src="calendar.js"></script>
+</body>
+
+</html>
