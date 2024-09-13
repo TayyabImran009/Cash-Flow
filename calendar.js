@@ -3,6 +3,7 @@ const calendarDays = document.getElementById('calendar-days');
 const prevMonthBtn = document.getElementById('prev-month');
 const nextMonthBtn = document.getElementById('next-month');
 const todayBtn = document.getElementById('today-btn');
+const calendar_bill_list = document.getElementById('calendar-bill-list');
 let billsIncomeList = JSON.parse(localStorage.getItem("billsIncomeList")) || [];
 
 const months = [
@@ -39,16 +40,102 @@ function displayCalendar(month, year) {
     for (let i = 1; i <= daysInMonth; i++) {
         const day = document.createElement("div");
         day.classList.add("day");
-        day.innerHTML = `<span>${i} <br><br>$${calculateTotalAmountForSpecificDate(`${i}`, daysInMonth, month, year)}</span>`;
+        day.innerHTML = `<span>${i} <br>$${calculateTotalAmountForSpecificDate(`${i}`, daysInMonth, month, year)}</span>`;
 
         // Highlight today's date
         if (isCurrentMonth && i === currentDay) {
             day.classList.add("today"); // Add the 'today' class
         }
 
+        day.addEventListener("click", () => {
+            const selectedDate = new Date(year, month, i);
+            displayBillsForDate(selectedDate); // Display bills for clicked date
+        });
+
         calendarDays.appendChild(day);
     }
+
 }
+
+function displayBillsForDate(selectedDate) {
+    calendar_bill_list.innerHTML = ""; // Clear previous bills
+
+    const selectedDateString = selectedDate.toISOString().split('T')[0];
+
+    const allOccurrences = [];
+    let modifiedOccurrences = JSON.parse(localStorage.getItem("modifiedOccurrences")) || [];
+    const billsIncomeList = JSON.parse(localStorage.getItem("billsIncomeList")) || [];
+
+    // Convert string dates to Date objects for modified occurrences
+    modifiedOccurrences = modifiedOccurrences.map(item => ({
+        ...item,
+        date: new Date(item.date)
+    }));
+
+    const fiftyYearsFromNow = new Date();
+    fiftyYearsFromNow.setFullYear(fiftyYearsFromNow.getFullYear() + 10);
+
+    // Gather all occurrences based on the frequency of each item
+    billsIncomeList.forEach(item => {
+        let dateParts = item.form_selected_date.split('-');
+        let year = parseInt(dateParts[0], 10);
+        let month = parseInt(dateParts[1], 10) - 1;
+        let day = parseInt(dateParts[2], 10);
+
+        let nextDate = new Date(year, month, day);
+
+        while (nextDate <= fiftyYearsFromNow && nextDate !== null) {
+            const occurrenceId = `${item.id}-${nextDate.getTime()}`;
+            const modifiedItem = modifiedOccurrences.find(mod => mod.occurrenceId === occurrenceId);
+
+            if (modifiedItem) {
+                allOccurrences.push(modifiedItem);
+            } else {
+                if (!item.paid || !item.paid.includes(occurrenceId)) {
+                    allOccurrences.push({
+                        id: item.id,
+                        occurrenceId: occurrenceId,
+                        name: item.name,
+                        type: item.type,
+                        amount: item.amount,
+                        date: new Date(nextDate),
+                        frequency: item.frequency
+                    });
+                }
+            }
+
+            if (item.frequency === "one-time") {
+                break;
+            }
+
+            nextDate = getNextOccurrenceDate(nextDate, item.frequency, item.form_selected_date);
+        }
+    });
+
+    // Filter occurrences by selected date
+    const billsForSelectedDate = allOccurrences.filter(item => {
+        const itemDate = new Date(item.date).toISOString().split('T')[0];
+        return itemDate === selectedDateString;
+    });
+
+    if (billsForSelectedDate.length === 0) {
+        calendar_bill_list.innerHTML = "<p>No bills for this date.</p>";
+    } else {
+        billsForSelectedDate.forEach(item => {
+            const billItem = document.createElement("div");
+            billItem.classList.add("bill-item");
+            billItem.innerHTML = `
+                <div class="bill-name">${item.name}</div>
+                <div class="bill-amount">$${item.amount.toFixed(2)}</div>
+                <div class="bill-type">${item.type}</div>
+                <div class="bill-frequency">${item.frequency}</div>
+            `;
+            calendar_bill_list.appendChild(billItem);
+        });
+    }
+}
+
+
 
 
 // Event listeners for buttons
