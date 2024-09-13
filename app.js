@@ -409,10 +409,10 @@ document.addEventListener("DOMContentLoaded", function () {
     
             while (nextDate <= fiftyYearsFromNow && nextDate !== null) {
                 const occurrenceId = `${item.id}-${nextDate.getTime()}`;
-                
-                // Check if this occurrenceId is in the permanentDelete list
-                if (permanentDelete.includes(occurrenceId)) {
-                    // Skip this occurrence if it was permanently deleted
+    
+                // Check if this occurrenceId is in the permanentDelete list or paid list
+                if (permanentDelete.includes(occurrenceId) || (item.paid && item.paid.includes(occurrenceId))) {
+                    // Skip this occurrence if it was permanently deleted or marked as paid
                     nextDate = getNextOccurrenceDate(nextDate, item.frequency, item.form_selected_date);
                     continue;
                 }
@@ -422,17 +422,15 @@ document.addEventListener("DOMContentLoaded", function () {
                 if (modifiedItem) {
                     allOccurrences.push(modifiedItem);
                 } else {
-                    if (!item.paid || !item.paid.includes(occurrenceId)) {
-                        allOccurrences.push({
-                            id: item.id,
-                            occurrenceId: occurrenceId,
-                            name: item.name,
-                            type: item.type,
-                            amount: item.amount,
-                            date: new Date(nextDate),
-                            frequency: item.frequency // Add frequency to the occurrence
-                        });
-                    }
+                    allOccurrences.push({
+                        id: item.id,
+                        occurrenceId: occurrenceId,
+                        name: item.name,
+                        type: item.type,
+                        amount: item.amount,
+                        date: new Date(nextDate),
+                        frequency: item.frequency // Add frequency to the occurrence
+                    });
                 }
     
                 if (item.frequency === "one-time") {
@@ -547,6 +545,7 @@ document.addEventListener("DOMContentLoaded", function () {
             }
         }
     }
+    
     
 
 

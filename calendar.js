@@ -97,10 +97,10 @@ function displayBillsForDate(selectedDate) {
             const occurrenceId = `${item.id}-${nextDate.getTime()}`;
             const modifiedItem = modifiedOccurrences.find(mod => mod.occurrenceId === occurrenceId);
 
-            // Check if the occurrence is in the permanentDelete list and skip it if found
-            if (permanentDelete.includes(occurrenceId)) {
+            // Check if the occurrence is in the permanentDelete list or paid list and skip it if found
+            if (permanentDelete.includes(occurrenceId) || (item.paid && item.paid.includes(occurrenceId))) {
                 nextDate = getNextOccurrenceDate(nextDate, item.frequency, item.form_selected_date);
-                continue; // Skip this occurrence if it's in permanentDelete
+                continue; // Skip this occurrence if it's in permanentDelete or paid
             }
 
             if (modifiedItem) {
@@ -212,16 +212,15 @@ function calculateTotalAmountForSpecificDate(current_day, daysInMonth, month, ye
             const occurrenceId = `${item.id}-${nextDate.getTime()}`;
             const modifiedItem = modifiedOccurrences.find(mod => mod.occurrenceId === occurrenceId);
 
-            // Check if the occurrence is in the permanentDelete list and skip it if found
-            if (permanentDelete.includes(occurrenceId)) {
+            // Check if the occurrence is in the permanentDelete list or paid list and skip it if found
+            if (permanentDelete.includes(occurrenceId) || (item.paid && item.paid.includes(occurrenceId))) {
                 nextDate = getNextOccurrenceDate(nextDate, item.frequency, item.form_selected_date);
-                continue; // Skip this occurrence if it's in permanentDelete
+                continue; // Skip this occurrence if it's in permanentDelete or paid
             }
 
             if (modifiedItem) {
                 allOccurrences.push(modifiedItem);
             } else {
-                // Check if the occurrence is in the paid list and skip it if found
                 if (!item.paid || !item.paid.includes(occurrenceId)) {
                     allOccurrences.push({
                         id: item.id,
