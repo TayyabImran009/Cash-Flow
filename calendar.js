@@ -70,10 +70,10 @@ function displayBillsForDate(selectedDate) {
     calendar_bill_list.innerHTML = ""; // Clear previous bills
 
     const selectedDateString = selectedDate.toISOString().split('T')[0];
-
     const allOccurrences = [];
     let modifiedOccurrences = JSON.parse(localStorage.getItem("modifiedOccurrences")) || [];
     const billsIncomeList = JSON.parse(localStorage.getItem("billsIncomeList")) || [];
+    const permanentDelete = JSON.parse(localStorage.getItem("permanentDelete")) || []; // Fetch permanentDelete list
 
     // Convert string dates to Date objects for modified occurrences
     modifiedOccurrences = modifiedOccurrences.map(item => ({
@@ -96,6 +96,12 @@ function displayBillsForDate(selectedDate) {
         while (nextDate <= fiftyYearsFromNow && nextDate !== null) {
             const occurrenceId = `${item.id}-${nextDate.getTime()}`;
             const modifiedItem = modifiedOccurrences.find(mod => mod.occurrenceId === occurrenceId);
+
+            // Check if the occurrence is in the permanentDelete list and skip it if found
+            if (permanentDelete.includes(occurrenceId)) {
+                nextDate = getNextOccurrenceDate(nextDate, item.frequency, item.form_selected_date);
+                continue; // Skip this occurrence if it's in permanentDelete
+            }
 
             if (modifiedItem) {
                 allOccurrences.push(modifiedItem);
@@ -186,6 +192,7 @@ function calculateTotalAmountForSpecificDate(current_day, daysInMonth, month, ye
     fiftyYearsFromNow.setFullYear(fiftyYearsFromNow.getFullYear() + 10);
     let runningBalance = 0;
     let modifiedOccurrences = JSON.parse(localStorage.getItem("modifiedOccurrences")) || [];
+    const permanentDelete = JSON.parse(localStorage.getItem("permanentDelete")) || []; // Fetch permanentDelete list
 
     // Convert string dates to Date objects
     modifiedOccurrences = modifiedOccurrences.map(item => ({
@@ -204,6 +211,12 @@ function calculateTotalAmountForSpecificDate(current_day, daysInMonth, month, ye
         while (nextDate <= fiftyYearsFromNow && nextDate !== null) {
             const occurrenceId = `${item.id}-${nextDate.getTime()}`;
             const modifiedItem = modifiedOccurrences.find(mod => mod.occurrenceId === occurrenceId);
+
+            // Check if the occurrence is in the permanentDelete list and skip it if found
+            if (permanentDelete.includes(occurrenceId)) {
+                nextDate = getNextOccurrenceDate(nextDate, item.frequency, item.form_selected_date);
+                continue; // Skip this occurrence if it's in permanentDelete
+            }
 
             if (modifiedItem) {
                 allOccurrences.push(modifiedItem);
@@ -247,6 +260,7 @@ function calculateTotalAmountForSpecificDate(current_day, daysInMonth, month, ye
 
     return runningBalance;
 }
+
 
 
 

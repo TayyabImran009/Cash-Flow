@@ -114,32 +114,32 @@ document.addEventListener("DOMContentLoaded", function () {
 
     function clearHistory() {
         if (confirm("Are you sure you want to clear the history? This action cannot be undone.")) {
-
-            let modifiedOccurrences = JSON.parse(localStorage.getItem("permanent_delete")) || [];
-            // Clear all the paid statuses
+            let permanentDelete = JSON.parse(localStorage.getItem("permanentDelete")) || [];
+            
+            // Push paid bills' occurrence IDs to the permanentDelete array
             billsIncomeList.forEach(item => {
-                item.paid = [];
+                if (item.paid && item.paid.length > 0) {
+                    permanentDelete.push(...item.paid);  // Add all paid occurrence IDs to permanentDelete
+                }
+                item.paid = [];  // Clear the paid list for each bill
             });
-
+    
+            // Update localStorage with the permanent delete list
+            localStorage.setItem("permanentDelete", JSON.stringify(permanentDelete));
+    
             let oneTimePaymentsBill = []; // Set it to an empty array
             localStorage.setItem("paidOneTimePayments", JSON.stringify(oneTimePaymentsBill)); // Update the localStorage
-
-
-            // Clear modified occurrences
-            modifiedOccurrences.forEach(mod => {
-                delete mod.paid;
-            });
-
+    
             // Save the changes
             saveData();
-
+    
             // Update the history and forecast lists to reflect the changes
             updateHistoryList();
             updateForecastList();
-
+    
             alert("History has been cleared.");
         }
-    }
+    }    
 
 
     // History link functionality is already declared, no need to redeclare it
@@ -391,23 +391,34 @@ document.addEventListener("DOMContentLoaded", function () {
     function updateForecastList() {
         const allOccurrences = [];
         let runningBalance = parseFloat(balanceInput.value) || 0;
-
+    
         const fiftyYearsFromNow = new Date();
         fiftyYearsFromNow.setFullYear(fiftyYearsFromNow.getFullYear() + 10);
-
+    
+        // Get the permanentDelete list from localStorage
+        const permanentDelete = JSON.parse(localStorage.getItem("permanentDelete")) || [];
+    
         // Gather all occurrences based on the frequency of each item
         billsIncomeList.forEach(item => {
             let dateParts = item.form_selected_date.split('-');
             let year = parseInt(dateParts[0], 10);
             let month = parseInt(dateParts[1], 10) - 1;
             let day = parseInt(dateParts[2], 10);
-
+    
             let nextDate = new Date(year, month, day);
-
+    
             while (nextDate <= fiftyYearsFromNow && nextDate !== null) {
                 const occurrenceId = `${item.id}-${nextDate.getTime()}`;
+                
+                // Check if this occurrenceId is in the permanentDelete list
+                if (permanentDelete.includes(occurrenceId)) {
+                    // Skip this occurrence if it was permanently deleted
+                    nextDate = getNextOccurrenceDate(nextDate, item.frequency, item.form_selected_date);
+                    continue;
+                }
+    
                 const modifiedItem = modifiedOccurrences.find(mod => mod.occurrenceId === occurrenceId);
-
+    
                 if (modifiedItem) {
                     allOccurrences.push(modifiedItem);
                 } else {
@@ -423,70 +434,67 @@ document.addEventListener("DOMContentLoaded", function () {
                         });
                     }
                 }
-
+    
                 if (item.frequency === "one-time") {
                     break; // Only one occurrence for one-time bills
                 }
-
+    
                 // Get the next occurrence date based on the frequency of the item
                 nextDate = getNextOccurrenceDate(nextDate, item.frequency, item.form_selected_date);
             }
         });
-
+    
         // Sort the occurrences by date
         allOccurrences.sort((a, b) => a.date - b.date);
-
+    
         let startDate;
         let endDate;
-
+    
         if (allOccurrences.length > 0) {
             const firstOccurrenceDate = new Date(allOccurrences[0].date); // Use the first date as the start date
             startDate = firstOccurrenceDate; // Starting from the first occurrence date
-
+    
             // Retrieve the forecast period from local storage and convert it to months
             const forecastPeriodMonths = parseFloat(localStorage.getItem("set_forecast_period")) || 3;
-
+    
             // Calculate the year and month manually
             let endYear = startDate.getFullYear();
             let endMonth = startDate.getMonth() + forecastPeriodMonths;
-
+    
             // Adjust the year based on how many full years the months add up to
             endYear += Math.floor(endMonth / 12);
             endMonth = endMonth % 12; // Ensure the month is within [0, 11] range
-
+    
             // Set the end date with the correct year and month
             endDate = new Date(startDate);
             endDate.setFullYear(endYear);
             endDate.setMonth(endMonth);
-
+    
             // If the new month doesn't have enough days (e.g., Feb 30), adjust to the last day of the month
             if (startDate.getDate() > endDate.getDate()) {
                 endDate.setDate(0); // Set to the last day of the previous month
             }
         }
-
+    
         // Clear the forecast list and only display items within the date range
         forecastList.innerHTML = '';  // Clear the forecast list
-
+    
         allOccurrences.forEach(item => {
             const itemDate = new Date(item.date);
-
+    
             // Check if the item falls within the forecast period
-
-
-
             if (itemDate >= startDate && itemDate <= endDate) {
                 const itemAmount = item.type === "income" ? item.amount : -item.amount;
                 runningBalance += itemAmount;
-
+    
                 const balanceClass = runningBalance < 0 ? "negative" : "positive";
                 const dayOfWeek = itemDate.toLocaleDateString(undefined, { weekday: 'short' });
                 let dueDate = itemDate.toLocaleDateString(undefined, { month: 'numeric', day: 'numeric', year: '2-digit' });
-
+    
                 const today = new Date();
                 const tomorrow = new Date();
                 tomorrow.setDate(today.getDate() + 1); // Correctly move to tomorrow's date
-
+    
                 let className = '';
                 if (itemDate.toDateString() === today.toDateString()) {
                     className = 'due-today';
@@ -495,40 +503,42 @@ document.addEventListener("DOMContentLoaded", function () {
                 } else if (itemDate < today) {
                     className = 'overdue';
                 }
+    
                 // Render only the items within the selected date range
                 forecastList.innerHTML += `
-            <div class="forecast-item ${item.type} ${className} forecast-item-container" data-occurrence-id="${item.occurrenceId}" onclick="toggleForecastItemContainer(this)">
-                <div class="forecast-item-container-contant">
-                    <div class="item-row top-row">
-                        <span class="day-of-week">${dayOfWeek}</span>
-                        <span class="bill-name">${item.name}</span>
-                        <span class="bill-amount" id="amount-${item.occurrenceId}">$${item.amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                <div class="forecast-item ${item.type} ${className} forecast-item-container" data-occurrence-id="${item.occurrenceId}" onclick="toggleForecastItemContainer(this)">
+                    <div class="forecast-item-container-contant">
+                        <div class="item-row top-row">
+                            <span class="day-of-week">${dayOfWeek}</span>
+                            <span class="bill-name">${item.name}</span>
+                            <span class="bill-amount" id="amount-${item.occurrenceId}">$${item.amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                        </div>
+                        <div class="item-row bottom-row">
+                            <span class="due-date" id="date-${item.occurrenceId}">${dueDate}</span>
+                            <span class="running-balance ${balanceClass}">$${runningBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                        </div>
                     </div>
-                    <div class="item-row bottom-row">
-                        <span class="due-date" id="date-${item.occurrenceId}">${dueDate}</span>
-                        <span class="running-balance ${balanceClass}">$${runningBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                    <div class="action-buttons-container">
+                            <button class="paid-button" onclick="markAsPaid('${item.id}', '${item.occurrenceId}')">Paid</button>
+                            <button class="edit-button" onclick="editForecastItem('${item.occurrenceId}')">Edit</button>
                     </div>
                 </div>
-                <div class="action-buttons-container">
-                        <button class="paid-button" onclick="markAsPaid('${item.id}', '${item.occurrenceId}')">Paid</button>
-                        <button class="edit-button" onclick="editForecastItem('${item.occurrenceId}')">Edit</button>
-                </div>
-            </div>
-        `;
+            `;
             }
         });
-
+    
         // Add the final balance at the end
         const finalBalanceItem = document.createElement("div");
         finalBalanceItem.className = "forecast-item final-balance";
         finalBalanceItem.innerHTML = `<strong>Final Balance: $${runningBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong>`;
         forecastList.appendChild(finalBalanceItem);
+    
         // Update the final balance in the index.html element
         const finalBalanceElement = document.getElementById('final-balance-amount');
-
+    
         if (finalBalanceElement) {
             finalBalanceElement.textContent = `$${runningBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-
+    
             // Set the color based on whether the balance is positive or negative
             if (runningBalance >= 0) {
                 finalBalanceElement.style.color = 'green'; // Positive balance
@@ -537,6 +547,7 @@ document.addEventListener("DOMContentLoaded", function () {
             }
         }
     }
+    
 
 
 
