@@ -64,11 +64,6 @@ function displayCalendar(month, year) {
         // Create the inner HTML with the appropriate class for the amount span, omit class if totalAmount is 0
         day.innerHTML = `<span>${i} <br><span class="${amountClass}">$${totalAmount}</span></span>`;
     
-        // Highlight today's date
-        if (isCurrentMonth && i === currentDay) {
-            day.classList.add("today"); // Add the 'today' class
-        }
-    
         day.addEventListener("click", () => {
             const selectedDate = new Date(year, month, i);
             displayBillsForDate(selectedDate); // Display bills for clicked date
@@ -97,6 +92,9 @@ function displayBillsForDate(selectedDate) {
 
     const fiftyYearsFromNow = new Date();
     fiftyYearsFromNow.setFullYear(fiftyYearsFromNow.getFullYear() + 10);
+
+    let initialBalance = parseFloat(localStorage.getItem("balance")) || 0; // Starting balance
+    let runningBalance = initialBalance; // Initialize running balance with saved balance
 
     // Gather all occurrences based on the frequency of each item
     billsIncomeList.forEach(item => {
@@ -141,6 +139,9 @@ function displayBillsForDate(selectedDate) {
         }
     });
 
+    // Sort occurrences by date so we can calculate the balance progressively
+    allOccurrences.sort((a, b) => new Date(a.date) - new Date(b.date));
+
     // Filter occurrences by selected date
     const billsForSelectedDate = allOccurrences.filter(item => {
         const itemDate = new Date(item.date).toISOString().split('T')[0];
@@ -150,11 +151,21 @@ function displayBillsForDate(selectedDate) {
     if (billsForSelectedDate.length === 0) {
         calendar_bill_list.innerHTML = "<p>No bills for this date.</p>";
     } else {
+        // Calculate running balance up to the selected date
+        allOccurrences.forEach(item => {
+            const itemAmount = item.type === "income" ? item.amount : -item.amount;
+            const itemDate = new Date(item.date).toISOString().split('T')[0];
+
+            if (itemDate <= selectedDateString) {
+                runningBalance += itemAmount;
+            }
+        });
+
+        // Now display the bills for the selected date and show the updated running balance
         billsForSelectedDate.forEach(item => {
             const itemAmount = item.type === "income" ? item.amount : -item.amount;
 
-            const balanceClass = itemAmount < 0 ? "negative" : "positive";
-
+            const balanceClass = runningBalance < 0 ? "negative" : "positive";
             const dayOfWeek = new Date(item.date).toLocaleDateString(undefined, { weekday: 'short' });
             const dueDate = new Date(item.date).toLocaleDateString(undefined, { month: 'numeric', day: 'numeric', year: '2-digit' });
 
@@ -165,11 +176,12 @@ function displayBillsForDate(selectedDate) {
                 <div class="forecast-item-container-contant">
                     <div class="item-row">
                         <span class="day-of-week">${dayOfWeek}</span>
-                        <span class="bill-name" style="text-align: end;">${item.name}</span>
+                        <span class="bill-name">${item.name}</span>
+                        <span class="bill-amount ${balanceClass}">$${item.amount.toFixed(2)}</span>
                     </div>
                     <div class="item-row bottom-row">
                         <span class="due-date">${dueDate}</span>
-                        <span class="bill-amount ${balanceClass}">$${item.amount.toFixed(2)}</span>
+                        <span class="running-balance ${balanceClass}">$${runningBalance.toFixed(2)}</span>
                     </div>
                 </div>
             `;
@@ -178,8 +190,6 @@ function displayBillsForDate(selectedDate) {
         });
     }
 }
-
-
 
 
 
