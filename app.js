@@ -891,7 +891,7 @@ document.addEventListener("DOMContentLoaded", function () {
             saveData();
 
             // Update balance in the input field
-            balanceInput.value = balance.toFixed(2);
+            balanceInput.value = balance.toFixed(2);  // Update the balanceInput field
 
             // Update the forecast, bills, and history lists
             updateForecastList();
