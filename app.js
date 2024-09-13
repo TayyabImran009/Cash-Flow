@@ -189,12 +189,13 @@ document.addEventListener("DOMContentLoaded", function () {
             return `
                 <div class="forecast-item ${item.type}">
                     <div class="item-row top-row">
-                        <span class="day-of-week">${dayOfWeek}</span>
-                        <span class="bill-name">${item.name}</span>
-                        <span class="bill-amount">$${item.amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                            <span class="day-of-week">${dayOfWeek}</span>
+                            <span class="bill-name">${item.name}</span>
+                            <span class="bill-amount">$${item.amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                     </div>
                     <div class="item-row bottom-row">
-                        <span class="due-date">${dueDate}</span>
+                        <span class="due-date" id="date-${item.occurrenceId}">${dueDate}</span>
+                        <button class="paid-button" onclick="markAsUnpaid('${item.id}', '${item.occurrenceId}', this.closest('.forecast-item'))">UnPaid</button>
                         <span class="running-balance ${balanceClass}">$${runningBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                     </div>
                 </div>
@@ -504,21 +505,17 @@ document.addEventListener("DOMContentLoaded", function () {
 
                 // Render only the items within the selected date range
                 forecastList.innerHTML += `
-                <div class="forecast-item ${item.type} ${className} forecast-item-container" data-occurrence-id="${item.occurrenceId}" onclick="toggleForecastItemContainer(this)">
-                    <div class="forecast-item-container-contant">
-                        <div class="item-row top-row">
-                            <span class="day-of-week">${dayOfWeek}</span>
-                            <span class="bill-name">${item.name}</span>
-                            <span class="bill-amount" id="amount-${item.occurrenceId}">$${item.amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-                        </div>
-                        <div class="item-row bottom-row">
-                            <span class="due-date" id="date-${item.occurrenceId}">${dueDate}</span>
-                            <span class="running-balance ${balanceClass}">$${runningBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-                        </div>
+                <div class="forecast-item ${item.type} ${className}" data-occurrence-id="${item.occurrenceId}">
+                    <div class="item-row top-row">
+                        <span class="day-of-week">${dayOfWeek}</span>
+                        <span class="bill-name">${item.name}</span>
+                        <span class="bill-amount" id="amount-${item.occurrenceId}">$${item.amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                     </div>
-                    <div class="action-buttons-container">
-                            <button class="paid-button" onclick="markAsPaid('${item.id}', '${item.occurrenceId}')">Paid</button>
-                            <button class="edit-button" onclick="editForecastItem('${item.occurrenceId}')">Edit</button>
+                    <div class="item-row bottom-row">
+                        <span class="due-date" id="date-${item.occurrenceId}">${dueDate}</span>
+                        <button class="paid-button" onclick="markAsPaid('${item.id}', '${item.occurrenceId}')">Paid</button>
+                        <button class="edit-button" onclick="editForecastItem('${item.occurrenceId}')">Edit</button>
+                        <span class="running-balance ${balanceClass}">$${runningBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                     </div>
                 </div>
             `;
@@ -683,20 +680,16 @@ document.addEventListener("DOMContentLoaded", function () {
             const dueDate = displayDate.toLocaleDateString(undefined, { month: 'numeric', day: 'numeric', year: '2-digit' });
 
             return `
-                <div class="forecast-item ${item.type} forecast-item-container" onclick="toggleForecastItemContainer(this)">
-                    <div class="forecast-item-container-contant">
-                        <div class="item-row top-row">
+                <div class="forecast-item ${item.type}">
+                    <div class="item-row top-row">
                             <span class="day-of-week">${dayOfWeek}</span>
                             <span class="bill-name">${item.name}</span>
                             <span class="bill-amount">$${item.amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-                        </div>
-                        <div class="item-row bottom-row">
-                            <span class="due-date">${dueDate}</span>
-                            <span class="running-balance ${balanceClass}">$${runningBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-                        </div>
                     </div>
-                    <div class="action-buttons-container">
-                            <button class="paid-button" onclick="markAsPaid('${item.id}', '${item.occurrenceId}')">UnPaid</button>
+                    <div class="item-row bottom-row">
+                        <span class="due-date" id="date-${item.occurrenceId}">${dueDate}</span>
+                        <button class="paid-button" onclick="markAsUnpaid('${item.id}', '${item.occurrenceId}', this.closest('.forecast-item'))">UnPaid</button>
+                        <span class="running-balance ${balanceClass}">$${runningBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                     </div>
                 </div>
             `;
@@ -763,20 +756,16 @@ document.addEventListener("DOMContentLoaded", function () {
             const dayOfWeek = displayDate.toLocaleDateString(undefined, { weekday: 'short' });
             const dueDate = displayDate.toLocaleDateString(undefined, { month: 'numeric', day: 'numeric', year: '2-digit' });
             return `
-                <div class="forecast-item ${item.type} history-item-container" onclick="toggleHistoryItemContainer(this)">
-                    <div class="forecast-item-container-contant">
-                        <div class="item-row top-row">
+                <div class="forecast-item ${item.type}">
+                    <div class="item-row top-row">
                             <span class="day-of-week">${dayOfWeek}</span>
                             <span class="bill-name">${item.name}</span>
                             <span class="bill-amount">$${item.amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-                        </div>
-                        <div class="item-row bottom-row">
-                            <span class="due-date">${dueDate}</span>
-                            <span class="running-balance ${balanceClass}">$${runningBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-                        </div>
                     </div>
-                    <div class="history-buttons-container">
-                            <button class="paid-button" onclick="markAsUnpaid('${item.id}', '${item.occurrenceId}', this.closest('.forecast-item'))">UnPaid</button>
+                    <div class="item-row bottom-row">
+                        <span class="due-date" id="date-${item.occurrenceId}">${dueDate}</span>
+                        <button class="paid-button" onclick="markAsUnpaid('${item.id}', '${item.occurrenceId}', this.closest('.forecast-item'))">UnPaid</button>
+                        <span class="running-balance ${balanceClass}">$${runningBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                     </div>
                 </div>
             `;
@@ -847,70 +836,70 @@ document.addEventListener("DOMContentLoaded", function () {
     window.markAsUnpaid = function (id, occurrenceId, itemElement) {
         // Add the animation class to the item (optional)
         itemElement.classList.add('slide-out');
-    
+
         // Delay the actual data changes to allow the animation to finish
         setTimeout(() => {
             // Try to find the one-time payment in paidOneTimePayments
             let paidOneTimePayments = JSON.parse(localStorage.getItem("paidOneTimePayments")) || [];
             const oneTimePaymentIndex = paidOneTimePayments.findIndex(item => item.id === id);
-            
+
             // Case 1: If the payment is a one-time payment
             if (oneTimePaymentIndex !== -1) {
                 const oneTimePayment = paidOneTimePayments[oneTimePaymentIndex];
-    
+
                 // Reverse the balance adjustment
                 if (oneTimePayment.type === "bill") {
                     balance += oneTimePayment.amount; // Add the bill amount back
                 } else if (oneTimePayment.type === "income") {
                     balance -= oneTimePayment.amount; // Subtract the income amount
                 }
-    
+
                 // Remove from the paidOneTimePayments list
                 paidOneTimePayments.splice(oneTimePaymentIndex, 1);
                 localStorage.setItem("paidOneTimePayments", JSON.stringify(paidOneTimePayments));
-    
+
                 // Add the unpaid item back to billsIncomeList with cleared paid status
                 billsIncomeList.push({
                     ...oneTimePayment,
                     paid: [] // Clear the paid array
                 });
-    
+
             } else {
                 // Case 2: If it's a regular payment stored in billsIncomeList
                 const billsIncomeIndex = billsIncomeList.findIndex(item => item.id === id);
                 if (billsIncomeIndex === -1) return; // If not found, exit the function
-    
+
                 const billItem = billsIncomeList[billsIncomeIndex];
-    
+
                 // Reverse the balance adjustment
                 if (billItem.type === "bill") {
                     balance += billItem.amount; // Add the bill amount back
                 } else if (billItem.type === "income") {
                     balance -= billItem.amount; // Subtract the income amount
                 }
-    
+
                 // Remove the occurrenceId from the paid array
                 if (billItem.paid) {
                     billItem.paid = billItem.paid.filter(paidId => paidId !== occurrenceId);
                 }
-    
+
                 // If no more occurrences are marked as paid, we don't need to move it elsewhere
                 billsIncomeList[billsIncomeIndex] = billItem;
             }
-    
+
             // Save changes to localStorage
             saveData();
-    
+
             // Update balance in the input field
             balanceInput.value = balance.toFixed(2);
-    
+
             // Update the forecast, bills, and history lists
             updateForecastList();
             updateBillsIncomeList();
             updateHistoryList();
-    
+
         }, 600); // Delay matching the animation duration
-    };    
+    };
 
 
     function getFrequencyIncrement(frequency) {
@@ -997,22 +986,4 @@ document.addEventListener("DOMContentLoaded", function () {
 
 });
 
-
-
-function toggleForecastItemContainer(e) {
-    document.querySelectorAll('input').forEach(element => {
-        element.addEventListener('click', function (event) {
-            event.stopPropagation(); // Prevent the event from bubbling up to the parent div
-        });
-    });
-
-    if (e.tagName !== "INPUT") {
-        e.classList.toggle("forecast-item-container-activate");
-    }
-}
-
-function toggleHistoryItemContainer(e) {
-
-    e.classList.toggle("history-item-container-activate");
-}
 
