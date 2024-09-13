@@ -115,7 +115,7 @@ document.addEventListener("DOMContentLoaded", function () {
     function clearHistory() {
         if (confirm("Are you sure you want to clear the history? This action cannot be undone.")) {
             let permanentDelete = JSON.parse(localStorage.getItem("permanentDelete")) || [];
-            
+
             // Push paid bills' occurrence IDs to the permanentDelete array
             billsIncomeList.forEach(item => {
                 if (item.paid && item.paid.length > 0) {
@@ -123,23 +123,23 @@ document.addEventListener("DOMContentLoaded", function () {
                 }
                 item.paid = [];  // Clear the paid list for each bill
             });
-    
+
             // Update localStorage with the permanent delete list
             localStorage.setItem("permanentDelete", JSON.stringify(permanentDelete));
-    
+
             let oneTimePaymentsBill = []; // Set it to an empty array
             localStorage.setItem("paidOneTimePayments", JSON.stringify(oneTimePaymentsBill)); // Update the localStorage
-    
+
             // Save the changes
             saveData();
-    
+
             // Update the history and forecast lists to reflect the changes
             updateHistoryList();
             updateForecastList();
-    
+
             alert("History has been cleared.");
         }
-    }    
+    }
 
 
     // History link functionality is already declared, no need to redeclare it
@@ -302,7 +302,7 @@ document.addEventListener("DOMContentLoaded", function () {
         // If the history section is selected, refresh the history list
         if (sectionId === "history") {
             updateHistoryList();  // Only update history if switching to the history tab
-        }else if (sectionId === "calendar") {
+        } else if (sectionId === "calendar") {
             reRenderCalendar();
         }
     }
@@ -391,34 +391,34 @@ document.addEventListener("DOMContentLoaded", function () {
     function updateForecastList() {
         const allOccurrences = [];
         let runningBalance = parseFloat(balanceInput.value) || 0;
-    
+
         const fiftyYearsFromNow = new Date();
         fiftyYearsFromNow.setFullYear(fiftyYearsFromNow.getFullYear() + 10);
-    
+
         // Get the permanentDelete list from localStorage
         const permanentDelete = JSON.parse(localStorage.getItem("permanentDelete")) || [];
-    
+
         // Gather all occurrences based on the frequency of each item
         billsIncomeList.forEach(item => {
             let dateParts = item.form_selected_date.split('-');
             let year = parseInt(dateParts[0], 10);
             let month = parseInt(dateParts[1], 10) - 1;
             let day = parseInt(dateParts[2], 10);
-    
+
             let nextDate = new Date(year, month, day);
-    
+
             while (nextDate <= fiftyYearsFromNow && nextDate !== null) {
                 const occurrenceId = `${item.id}-${nextDate.getTime()}`;
-    
+
                 // Check if this occurrenceId is in the permanentDelete list or paid list
                 if (permanentDelete.includes(occurrenceId) || (item.paid && item.paid.includes(occurrenceId))) {
                     // Skip this occurrence if it was permanently deleted or marked as paid
                     nextDate = getNextOccurrenceDate(nextDate, item.frequency, item.form_selected_date);
                     continue;
                 }
-    
+
                 const modifiedItem = modifiedOccurrences.find(mod => mod.occurrenceId === occurrenceId);
-    
+
                 if (modifiedItem) {
                     allOccurrences.push(modifiedItem);
                 } else {
@@ -432,67 +432,67 @@ document.addEventListener("DOMContentLoaded", function () {
                         frequency: item.frequency // Add frequency to the occurrence
                     });
                 }
-    
+
                 if (item.frequency === "one-time") {
                     break; // Only one occurrence for one-time bills
                 }
-    
+
                 // Get the next occurrence date based on the frequency of the item
                 nextDate = getNextOccurrenceDate(nextDate, item.frequency, item.form_selected_date);
             }
         });
-    
+
         // Sort the occurrences by date
         allOccurrences.sort((a, b) => a.date - b.date);
-    
+
         let startDate;
         let endDate;
-    
+
         if (allOccurrences.length > 0) {
             const firstOccurrenceDate = new Date(allOccurrences[0].date); // Use the first date as the start date
             startDate = firstOccurrenceDate; // Starting from the first occurrence date
-    
+
             // Retrieve the forecast period from local storage and convert it to months
             const forecastPeriodMonths = parseFloat(localStorage.getItem("set_forecast_period")) || 3;
-    
+
             // Calculate the year and month manually
             let endYear = startDate.getFullYear();
             let endMonth = startDate.getMonth() + forecastPeriodMonths;
-    
+
             // Adjust the year based on how many full years the months add up to
             endYear += Math.floor(endMonth / 12);
             endMonth = endMonth % 12; // Ensure the month is within [0, 11] range
-    
+
             // Set the end date with the correct year and month
             endDate = new Date(startDate);
             endDate.setFullYear(endYear);
             endDate.setMonth(endMonth);
-    
+
             // If the new month doesn't have enough days (e.g., Feb 30), adjust to the last day of the month
             if (startDate.getDate() > endDate.getDate()) {
                 endDate.setDate(0); // Set to the last day of the previous month
             }
         }
-    
+
         // Clear the forecast list and only display items within the date range
         forecastList.innerHTML = '';  // Clear the forecast list
-    
+
         allOccurrences.forEach(item => {
             const itemDate = new Date(item.date);
-    
+
             // Check if the item falls within the forecast period
             if (itemDate >= startDate && itemDate <= endDate) {
                 const itemAmount = item.type === "income" ? item.amount : -item.amount;
                 runningBalance += itemAmount;
-    
+
                 const balanceClass = runningBalance < 0 ? "negative" : "positive";
                 const dayOfWeek = itemDate.toLocaleDateString(undefined, { weekday: 'short' });
                 let dueDate = itemDate.toLocaleDateString(undefined, { month: 'numeric', day: 'numeric', year: '2-digit' });
-    
+
                 const today = new Date();
                 const tomorrow = new Date();
                 tomorrow.setDate(today.getDate() + 1); // Correctly move to tomorrow's date
-    
+
                 let className = '';
                 if (itemDate.toDateString() === today.toDateString()) {
                     className = 'due-today';
@@ -501,7 +501,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 } else if (itemDate < today) {
                     className = 'overdue';
                 }
-    
+
                 // Render only the items within the selected date range
                 forecastList.innerHTML += `
                 <div class="forecast-item ${item.type} ${className} forecast-item-container" data-occurrence-id="${item.occurrenceId}" onclick="toggleForecastItemContainer(this)">
@@ -524,19 +524,19 @@ document.addEventListener("DOMContentLoaded", function () {
             `;
             }
         });
-    
+
         // Add the final balance at the end
         const finalBalanceItem = document.createElement("div");
         finalBalanceItem.className = "forecast-item final-balance";
         finalBalanceItem.innerHTML = `<strong>Final Balance: $${runningBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong>`;
         forecastList.appendChild(finalBalanceItem);
-    
+
         // Update the final balance in the index.html element
         const finalBalanceElement = document.getElementById('final-balance-amount');
-    
+
         if (finalBalanceElement) {
             finalBalanceElement.textContent = `$${runningBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-    
+
             // Set the color based on whether the balance is positive or negative
             if (runningBalance >= 0) {
                 finalBalanceElement.style.color = 'green'; // Positive balance
@@ -545,8 +545,8 @@ document.addEventListener("DOMContentLoaded", function () {
             }
         }
     }
-    
-    
+
+
 
 
 
@@ -845,75 +845,72 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
     window.markAsUnpaid = function (id, occurrenceId, itemElement) {
-
-        console.log("Found element:", itemElement);
-
         // Add the animation class to the item (optional)
         itemElement.classList.add('slide-out');
-
+    
         // Delay the actual data changes to allow the animation to finish
         setTimeout(() => {
-            // Find the original item by its id in the billsIncomeList
-            console.log(billsIncomeList, "billsIncomeList")
-            const originalIndex = billsIncomeList.findIndex(item => item.id === id);
-
-            console.log(originalIndex, "originalIndex")
-            if (originalIndex === -1) return;
-
-            const originalItem = billsIncomeList[originalIndex];
-
-            console.log(originalItem, "originalItem")
-            // Find the modified occurrence by occurrenceId
-            const modifiedIndex = modifiedOccurrences.findIndex(mod => mod.id === id);
-            let occurrence = originalItem;
-
-            console.log(modifiedIndex, "modifiedIndex")
-
-            if (modifiedIndex > -1) {
-                occurrence = modifiedOccurrences[modifiedIndex];
-            }
-
-            // Reverse the balance adjustment
-            if (occurrence.type === "bill") {
-                balance += occurrence.amount; // Add the bill amount back
-            } else if (occurrence.type === "income") {
-                balance -= occurrence.amount; // Subtract the income amount
-            }
-
-            console.log(occurrence, "occurrence")
-            // Remove the occurrenceId from the paid array in the original item
-            console.log(occurrenceId, "occurrenceId")
-            console.log(originalItem.paid, "originalItem.paid")
-            if (originalItem.paid) {
-                originalItem.paid = originalItem.paid.filter(paidId => paidId != occurrenceId);
-            }
-
-            console.log(originalItem.paid, "originalItem.paid")
-
-            // Update the modified occurrences if the item was modified
-            if (modifiedIndex > -1) {
-                modifiedOccurrences[modifiedIndex].paid = false; // Mark it as unpaid
-            }
-
-            // If it's a one-time bill, remove it from paidOneTimePayments
-            if (originalItem.frequency === "one-time") {
-                let paidOneTimePayments = JSON.parse(localStorage.getItem("paidOneTimePayments")) || [];
-                paidOneTimePayments = paidOneTimePayments.filter(item => item.id !== id);
+            // Try to find the one-time payment in paidOneTimePayments
+            let paidOneTimePayments = JSON.parse(localStorage.getItem("paidOneTimePayments")) || [];
+            const oneTimePaymentIndex = paidOneTimePayments.findIndex(item => item.id === id);
+            
+            // Case 1: If the payment is a one-time payment
+            if (oneTimePaymentIndex !== -1) {
+                const oneTimePayment = paidOneTimePayments[oneTimePaymentIndex];
+    
+                // Reverse the balance adjustment
+                if (oneTimePayment.type === "bill") {
+                    balance += oneTimePayment.amount; // Add the bill amount back
+                } else if (oneTimePayment.type === "income") {
+                    balance -= oneTimePayment.amount; // Subtract the income amount
+                }
+    
+                // Remove from the paidOneTimePayments list
+                paidOneTimePayments.splice(oneTimePaymentIndex, 1);
                 localStorage.setItem("paidOneTimePayments", JSON.stringify(paidOneTimePayments));
+    
+                // Add the unpaid item back to billsIncomeList with cleared paid status
+                billsIncomeList.push({
+                    ...oneTimePayment,
+                    paid: [] // Clear the paid array
+                });
+    
+            } else {
+                // Case 2: If it's a regular payment stored in billsIncomeList
+                const billsIncomeIndex = billsIncomeList.findIndex(item => item.id === id);
+                if (billsIncomeIndex === -1) return; // If not found, exit the function
+    
+                const billItem = billsIncomeList[billsIncomeIndex];
+    
+                // Reverse the balance adjustment
+                if (billItem.type === "bill") {
+                    balance += billItem.amount; // Add the bill amount back
+                } else if (billItem.type === "income") {
+                    balance -= billItem.amount; // Subtract the income amount
+                }
+    
+                // Remove the occurrenceId from the paid array
+                if (billItem.paid) {
+                    billItem.paid = billItem.paid.filter(paidId => paidId !== occurrenceId);
+                }
+    
+                // If no more occurrences are marked as paid, we don't need to move it elsewhere
+                billsIncomeList[billsIncomeIndex] = billItem;
             }
-
-            // Save the changes back to localStorage
+    
+            // Save changes to localStorage
             saveData();
-            balanceInput.value = balance.toFixed(2); // Update the displayed balance
-            updateForecastList(); // Update forecast and history lists
+    
+            // Update balance in the input field
+            balanceInput.value = balance.toFixed(2);
+    
+            // Update the forecast, bills, and history lists
+            updateForecastList();
             updateBillsIncomeList();
             updateHistoryList();
-        }, 600); // Delay matching the animation duration (if you have an animation)
-    };
-
-
-
-
+    
+        }, 600); // Delay matching the animation duration
+    };    
 
 
     function getFrequencyIncrement(frequency) {
