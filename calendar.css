@@ -71,7 +71,7 @@
   .day {
     background-color: white;
     border: 1px solid #ddd;
-    min-height: 80px;
+    min-height: 40px;
     position: relative;
   }
   
@@ -99,4 +99,12 @@
     border-radius: 50%;
     font-weight: bold;
   }
+
+.red{
+  color: red;
+}
+
+.green{
+  color: green;
+}
   

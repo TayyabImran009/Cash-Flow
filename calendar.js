@@ -49,20 +49,34 @@ function displayCalendar(month, year) {
     for (let i = 1; i <= daysInMonth; i++) {
         const day = document.createElement("div");
         day.classList.add("day");
-        day.innerHTML = `<span>${i} <br>$${calculateTotalAmountForSpecificDate(`${i}`, daysInMonth, month, year)}</span>`;
-
+    
+        // Calculate the total amount for the specific date
+        const totalAmount = calculateTotalAmountForSpecificDate(`${i}`, daysInMonth, month, year);
+    
+        // Determine the class based on whether the totalAmount is positive, negative, or zero
+        let amountClass = "";
+        if (totalAmount < 0) {
+            amountClass = "red";
+        } else if (totalAmount > 0) {
+            amountClass = "green";
+        }
+    
+        // Create the inner HTML with the appropriate class for the amount span, omit class if totalAmount is 0
+        day.innerHTML = `<span>${i} <br><span class="${amountClass}">$${totalAmount}</span></span>`;
+    
         // Highlight today's date
         if (isCurrentMonth && i === currentDay) {
             day.classList.add("today"); // Add the 'today' class
         }
-
+    
         day.addEventListener("click", () => {
             const selectedDate = new Date(year, month, i);
             displayBillsForDate(selectedDate); // Display bills for clicked date
         });
-
+    
         calendarDays.appendChild(day);
     }
+    
 
 }
 
@@ -137,18 +151,34 @@ function displayBillsForDate(selectedDate) {
         calendar_bill_list.innerHTML = "<p>No bills for this date.</p>";
     } else {
         billsForSelectedDate.forEach(item => {
+            const itemAmount = item.type === "income" ? item.amount : -item.amount;
+
+            const balanceClass = itemAmount < 0 ? "negative" : "positive";
+
+            const dayOfWeek = new Date(item.date).toLocaleDateString(undefined, { weekday: 'short' });
+            const dueDate = new Date(item.date).toLocaleDateString(undefined, { month: 'numeric', day: 'numeric', year: '2-digit' });
+
             const billItem = document.createElement("div");
-            billItem.classList.add("bill-item");
+            billItem.classList.add("forecast-item", item.type, "history-item-container");
+
             billItem.innerHTML = `
-                <div class="bill-name">${item.name}</div>
-                <div class="bill-amount">$${item.amount.toFixed(2)}</div>
-                <div class="bill-type">${item.type}</div>
-                <div class="bill-frequency">${item.frequency}</div>
+                <div class="forecast-item-container-contant">
+                    <div class="item-row">
+                        <span class="day-of-week">${dayOfWeek}</span>
+                        <span class="bill-name" style="text-align: end;">${item.name}</span>
+                    </div>
+                    <div class="item-row bottom-row">
+                        <span class="due-date">${dueDate}</span>
+                        <span class="bill-amount ${balanceClass}">$${item.amount.toFixed(2)}</span>
+                    </div>
+                </div>
             `;
+
             calendar_bill_list.appendChild(billItem);
         });
     }
 }
+
 
 
 
