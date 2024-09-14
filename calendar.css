@@ -101,12 +101,11 @@
   color: green;
 }
 
-
 .balance-dot {
-  width: 10px;
-  height: 10px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
-  margin: 5px auto;
+  display: inline-block;
 }
 
 .red-dot {
@@ -116,5 +115,3 @@
 .green-dot {
   background-color: green;
 }
-
-  

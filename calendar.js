@@ -8,7 +8,7 @@ let billsIncomeList = JSON.parse(localStorage.getItem("billsIncomeList")) || [];
 
 function reRenderCalendar() {
     billsIncomeList = JSON.parse(localStorage.getItem("billsIncomeList")) || [];
-    
+
     date = new Date();
     currentMonth = date.getMonth();
     currentYear = date.getFullYear();
@@ -25,7 +25,6 @@ let currentMonth = date.getMonth();
 let currentYear = date.getFullYear();
 
 // Function to display calendar
-// Function to display calendar
 function displayCalendar(month, year) {
     calendarDays.innerHTML = ""; // Clear previous days
     monthYear.textContent = `${months[month]} ${year}`;
@@ -33,10 +32,8 @@ function displayCalendar(month, year) {
     const firstDay = new Date(year, month, 1).getDay();
     const daysInMonth = new Date(year, month + 1, 0).getDate();
 
-    // Get today's date
-    const today = new Date();
-    const isCurrentMonth = (today.getMonth() === month && today.getFullYear() === year);
-    const currentDay = today.getDate();
+    // Initialize balance
+    let initialBalance = parseFloat(localStorage.getItem("balance")) || 0;
 
     // Adding blank days to align the first day
     for (let i = 0; i < firstDay; i++) {
@@ -49,31 +46,46 @@ function displayCalendar(month, year) {
     for (let i = 1; i <= daysInMonth; i++) {
         const day = document.createElement("div");
         day.classList.add("day");
-    
-        // Calculate the total amount for the specific date
-        const totalAmount = calculateTotalAmountForSpecificDate(`${i}`, daysInMonth, month, year);
-    
-        // Determine the class based on whether the totalAmount is positive, negative, or zero
-        let amountClass = "";
-        if (totalAmount < 0) {
-            amountClass = "red";
-        } else if (totalAmount > 0) {
-            amountClass = "green";
+
+        // Calculate the cumulative balance for the specific date
+        const balanceForDay = calculateBalanceForDate(i, month, year, initialBalance);
+
+        // Determine the class for the balance dot based on whether the balance is positive or negative
+        let balanceDotClass = "";
+        if (balanceForDay < 0) {
+            balanceDotClass = "red-dot"; // Class for red dot (negative balance)
+        } else if (balanceForDay > 0) {
+            balanceDotClass = "green-dot"; // Class for green dot (positive balance)
         }
-    
-        // Create the inner HTML with the appropriate class for the amount span, omit class if totalAmount is 0
-        day.innerHTML = `<span>${i} <br><span class="${amountClass}">$${totalAmount}</span></span>`;
-    
+
+        // Calculate the total amount for the specific date
+        const totalAmount = calculateTotalAmountForSpecificDate(i, daysInMonth, month, year);
+
+        // Only show the dot if the balance is not zero and there is a bill
+        const balanceDot = (balanceForDay !== 0 && totalAmount !== 0)
+            ? `<div class="balance-dot ${balanceDotClass}"></div>`
+            : '';
+
+        // Create the inner HTML with a dot for balance indication, if applicable
+        day.innerHTML = `
+            <span>${i}</span>
+            ${balanceDot}
+            <br>
+            <span>$${totalAmount}</span>
+        `;
+
         day.addEventListener("click", () => {
             const selectedDate = new Date(year, month, i);
             displayBillsForDate(selectedDate); // Display bills for clicked date
         });
-    
+
         calendarDays.appendChild(day);
     }
-    
-
 }
+
+
+
+
 
 function displayBillsForDate(selectedDate) {
     calendar_bill_list.innerHTML = ""; // Clear previous bills
@@ -193,6 +205,8 @@ function displayBillsForDate(selectedDate) {
 
 
 
+
+
 // Event listeners for buttons
 prevMonthBtn.addEventListener("click", () => {
     currentMonth--;
@@ -221,6 +235,61 @@ todayBtn.addEventListener("click", () => {
 
 // Initial render
 displayCalendar(currentMonth, currentYear);
+
+
+function calculateBalanceForDate(current_day, month, year, initialBalance) {
+    let runningBalance = initialBalance; // Start with the initial balance
+    const fiftyYearsFromNow = new Date();
+    fiftyYearsFromNow.setFullYear(fiftyYearsFromNow.getFullYear() + 10);
+
+    let modifiedOccurrences = JSON.parse(localStorage.getItem("modifiedOccurrences")) || [];
+    const permanentDelete = JSON.parse(localStorage.getItem("permanentDelete")) || []; // Fetch permanentDelete list
+
+    // Convert string dates to Date objects
+    modifiedOccurrences = modifiedOccurrences.map(item => ({
+        ...item,
+        date: new Date(item.date)
+    }));
+
+    // Process all bills in the billsIncomeList
+    billsIncomeList.forEach(item => {
+        let dateParts = item.form_selected_date.split('-');
+        let billYear = parseInt(dateParts[0], 10);
+        let billMonth = parseInt(dateParts[1], 10) - 1;
+        let billDay = parseInt(dateParts[2], 10);
+
+        let nextDate = new Date(billYear, billMonth, billDay);
+
+        // Loop through each occurrence of the bill/income until the end date
+        while (nextDate <= fiftyYearsFromNow && nextDate !== null) {
+            const occurrenceId = `${item.id}-${nextDate.getTime()}`;
+            const modifiedItem = modifiedOccurrences.find(mod => mod.occurrenceId === occurrenceId);
+
+            // Skip occurrences that are in permanentDelete or paid
+            if (permanentDelete.includes(occurrenceId) || (item.paid && item.paid.includes(occurrenceId))) {
+                nextDate = getNextOccurrenceDate(nextDate, item.frequency, item.form_selected_date);
+                continue;
+            }
+
+            const itemAmount = item.type === "income" ? item.amount : -item.amount;
+
+            // Only include occurrences up to and including the current day
+            const currentDate = new Date(year, month, current_day);
+            if (nextDate <= currentDate) {
+                runningBalance += itemAmount;
+            }
+
+            if (item.frequency === "one-time") {
+                break; // Only one occurrence for one-time bills
+            }
+
+            // Get the next occurrence date based on the frequency of the item
+            nextDate = getNextOccurrenceDate(nextDate, item.frequency, item.form_selected_date);
+        }
+    });
+
+    return runningBalance; // Return the cumulative balance up to the given date
+}
 
 
 
