@@ -121,15 +121,14 @@
   background-color: rgb(0 38 255);
 }
 
-
-@media screen and (max-width: 540px) {
+@media screen and (max-width: 761px) {
   .day{
     font-size: 12px;
     min-height: 27px;
   }
 }
 
-@media screen and (max-width: 457px) {
+@media screen and (max-width: 612px) {
   .day{
     font-size: 12px;
     min-height: 19px;
@@ -137,16 +136,23 @@
   }
 }
 
-@media screen and (max-width: 417px) {
+@media screen and (max-width: 583px) {
   .day{
     font-size: 11px;
     padding: 5px;
   }
 }
 
-@media screen and (max-width: 351px) {
+@media screen and (max-width: 499px) {
   .day{
     font-size: 9px;
     padding: 4px;
+  }
+}
+
+@media screen and (max-width: 499px) {
+  .day{
+    font-size: 7px;
+    padding: 2px;
   }
 }
