@@ -32,6 +32,11 @@ function displayCalendar(month, year) {
     const firstDay = new Date(year, month, 1).getDay();
     const daysInMonth = new Date(year, month + 1, 0).getDate();
 
+    // Get today's date
+    const today = new Date();
+    const isCurrentMonth = (today.getMonth() === month && today.getFullYear() === year);
+    const currentDay = today.getDate();
+
     // Initialize balance
     let initialBalance = parseFloat(localStorage.getItem("balance")) || 0;
 
@@ -73,6 +78,10 @@ function displayCalendar(month, year) {
             <br>
             <span>$${totalAmount}</span>
         `;
+
+        if (isCurrentMonth && i === currentDay) {
+            day.classList.add("today"); // Add the 'today' class
+        }
 
         day.addEventListener("click", () => {
             const selectedDate = new Date(year, month, i);

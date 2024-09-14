@@ -836,70 +836,80 @@ document.addEventListener("DOMContentLoaded", function () {
     window.markAsUnpaid = function (id, occurrenceId, itemElement) {
         // Add the animation class to the item (optional)
         itemElement.classList.add('slide-out');
-
+    
         // Delay the actual data changes to allow the animation to finish
         setTimeout(() => {
             // Try to find the one-time payment in paidOneTimePayments
             let paidOneTimePayments = JSON.parse(localStorage.getItem("paidOneTimePayments")) || [];
             const oneTimePaymentIndex = paidOneTimePayments.findIndex(item => item.id === id);
-
+    
+            let billItem;
+    
             // Case 1: If the payment is a one-time payment
             if (oneTimePaymentIndex !== -1) {
                 const oneTimePayment = paidOneTimePayments[oneTimePaymentIndex];
-
+    
+                // Reverse the balance adjustment using the modified amount, if available
+                const modifiedItem = modifiedOccurrences.find(mod => mod.occurrenceId === occurrenceId);
+                const amount = modifiedItem ? modifiedItem.amount : oneTimePayment.amount; // Use modified value if it exists
+    
                 // Reverse the balance adjustment
                 if (oneTimePayment.type === "bill") {
-                    balance += oneTimePayment.amount; // Add the bill amount back
+                    balance += amount; // Add the bill amount back
                 } else if (oneTimePayment.type === "income") {
-                    balance -= oneTimePayment.amount; // Subtract the income amount
+                    balance -= amount; // Subtract the income amount
                 }
-
+    
                 // Remove from the paidOneTimePayments list
                 paidOneTimePayments.splice(oneTimePaymentIndex, 1);
                 localStorage.setItem("paidOneTimePayments", JSON.stringify(paidOneTimePayments));
-
+    
                 // Add the unpaid item back to billsIncomeList with cleared paid status
-                billsIncomeList.push({
+                billItem = {
                     ...oneTimePayment,
                     paid: [] // Clear the paid array
-                });
-
+                };
+                billsIncomeList.push(billItem);
+    
             } else {
                 // Case 2: If it's a regular payment stored in billsIncomeList
                 const billsIncomeIndex = billsIncomeList.findIndex(item => item.id === id);
                 if (billsIncomeIndex === -1) return; // If not found, exit the function
-
-                const billItem = billsIncomeList[billsIncomeIndex];
-
-                // Reverse the balance adjustment
+    
+                billItem = billsIncomeList[billsIncomeIndex];
+    
+                // Reverse the balance adjustment using the modified value, if available
+                const modifiedItem = modifiedOccurrences.find(mod => mod.occurrenceId === occurrenceId);
+                const amount = modifiedItem ? modifiedItem.amount : billItem.amount; // Use modified value if it exists
+    
                 if (billItem.type === "bill") {
-                    balance += billItem.amount; // Add the bill amount back
+                    balance += amount; // Add the bill amount back
                 } else if (billItem.type === "income") {
-                    balance -= billItem.amount; // Subtract the income amount
+                    balance -= amount; // Subtract the income amount
                 }
-
+    
                 // Remove the occurrenceId from the paid array
                 if (billItem.paid) {
                     billItem.paid = billItem.paid.filter(paidId => paidId !== occurrenceId);
                 }
-
-                // If no more occurrences are marked as paid, we don't need to move it elsewhere
+    
                 billsIncomeList[billsIncomeIndex] = billItem;
             }
-
+    
             // Save changes to localStorage
             saveData();
-
+    
             // Update balance in the input field
             balanceInput.value = balance.toFixed(2);  // Update the balanceInput field
-
+    
             // Update the forecast, bills, and history lists
             updateForecastList();
             updateBillsIncomeList();
             updateHistoryList();
-
+    
         }, 600); // Delay matching the animation duration
     };
+    
 
 
     function getFrequencyIncrement(frequency) {

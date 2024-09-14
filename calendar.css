@@ -115,3 +115,8 @@
 .green-dot {
   background-color: green;
 }
+
+
+.today {
+  border: 1px solid rgb(0 38 255)
+}
