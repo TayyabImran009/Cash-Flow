@@ -25,6 +25,7 @@ let currentMonth = date.getMonth();
 let currentYear = date.getFullYear();
 
 // Function to display calendar
+// Function to display the calendar
 function displayCalendar(month, year) {
     calendarDays.innerHTML = ""; // Clear previous days
     monthYear.textContent = `${months[month]} ${year}`;
@@ -37,8 +38,8 @@ function displayCalendar(month, year) {
     const isCurrentMonth = (today.getMonth() === month && today.getFullYear() === year);
     const currentDay = today.getDate();
 
-    // Initialize balance
-    let initialBalance = parseFloat(localStorage.getItem("balance")) || 0;
+    // Initialize running balance from localStorage
+    let runningBalance = parseFloat(localStorage.getItem("balance")) || 0;
 
     // Adding blank days to align the first day
     for (let i = 0; i < firstDay; i++) {
@@ -52,31 +53,28 @@ function displayCalendar(month, year) {
         const day = document.createElement("div");
         day.classList.add("day");
 
-        // Calculate the cumulative balance for the specific date
-        const balanceForDay = calculateBalanceForDate(i, month, year, initialBalance);
+        // Calculate the running balance for the specific day
+        runningBalance = calculateBalanceForDate(i, month, year, runningBalance);
 
         // Determine the class for the balance dot based on whether the balance is positive or negative
         let balanceDotClass = "";
-        if (balanceForDay < 0) {
+        if (runningBalance < 0) {
             balanceDotClass = "red-dot"; // Class for red dot (negative balance)
-        } else if (balanceForDay > 0) {
+        } else if (runningBalance > 0) {
             balanceDotClass = "green-dot"; // Class for green dot (positive balance)
         }
 
-        // Calculate the total amount for the specific date
-        const totalAmount = calculateTotalAmountForSpecificDate(i, daysInMonth, month, year);
-
-        // Only show the dot if the balance is not zero and there is a bill
-        const balanceDot = (balanceForDay !== 0 && totalAmount !== 0)
+        // Only show the dot if there is a balance
+        const balanceDot = (runningBalance !== 0)
             ? `<div class="balance-dot ${balanceDotClass}"></div>`
             : '';
 
-        // Create the inner HTML with a dot for balance indication, if applicable
+        // Create the inner HTML with the running balance
         day.innerHTML = `
             <span>${i}</span>
             ${balanceDot}
             <br>
-            <span>$${totalAmount}</span>
+            <span>$${runningBalance.toFixed(2)}</span>
         `;
 
         if (isCurrentMonth && i === currentDay) {
@@ -91,10 +89,6 @@ function displayCalendar(month, year) {
         calendarDays.appendChild(day);
     }
 }
-
-
-
-
 
 function displayBillsForDate(selectedDate) {
     calendar_bill_list.innerHTML = ""; // Clear previous bills
@@ -163,6 +157,15 @@ function displayBillsForDate(selectedDate) {
     // Sort occurrences by date so we can calculate the balance progressively
     allOccurrences.sort((a, b) => new Date(a.date) - new Date(b.date));
 
+    // Calculate running balance up to the selected date (but not beyond)
+    allOccurrences.forEach(item => {
+        const itemDate = new Date(item.date).toISOString().split('T')[0];
+        if (itemDate < selectedDateString) {
+            const itemAmount = item.type === "income" ? item.amount : -item.amount;
+            runningBalance += itemAmount;
+        }
+    });
+
     // Filter occurrences by selected date
     const billsForSelectedDate = allOccurrences.filter(item => {
         const itemDate = new Date(item.date).toISOString().split('T')[0];
@@ -172,19 +175,11 @@ function displayBillsForDate(selectedDate) {
     if (billsForSelectedDate.length === 0) {
         calendar_bill_list.innerHTML = "<p>No bills for this date.</p>";
     } else {
-        // Calculate running balance up to the selected date
-        allOccurrences.forEach(item => {
-            const itemAmount = item.type === "income" ? item.amount : -item.amount;
-            const itemDate = new Date(item.date).toISOString().split('T')[0];
-
-            if (itemDate <= selectedDateString) {
-                runningBalance += itemAmount;
-            }
-        });
-
-        // Now display the bills for the selected date and show the updated running balance
+        // Now display the bills for the selected date
         billsForSelectedDate.forEach(item => {
+            // First, update the running balance before showing the bill
             const itemAmount = item.type === "income" ? item.amount : -item.amount;
+            runningBalance += itemAmount;
 
             const balanceClass = runningBalance < 0 ? "negative" : "positive";
             const dayOfWeek = new Date(item.date).toLocaleDateString(undefined, { weekday: 'short' });
@@ -211,7 +206,6 @@ function displayBillsForDate(selectedDate) {
         });
     }
 }
-
 
 
 
@@ -246,8 +240,8 @@ todayBtn.addEventListener("click", () => {
 displayCalendar(currentMonth, currentYear);
 
 
-function calculateBalanceForDate(current_day, month, year, initialBalance) {
-    let runningBalance = initialBalance; // Start with the initial balance
+function calculateBalanceForDate(current_day, month, year, runningBalance) {
+    let hasBillOrIncome = false; // Track if there are any bills or incomes for the day
     const fiftyYearsFromNow = new Date();
     fiftyYearsFromNow.setFullYear(fiftyYearsFromNow.getFullYear() + 10);
 
@@ -282,10 +276,11 @@ function calculateBalanceForDate(current_day, month, year, initialBalance) {
 
             const itemAmount = item.type === "income" ? item.amount : -item.amount;
 
-            // Only include occurrences up to and including the current day
+            // Only include occurrences on the current day
             const currentDate = new Date(year, month, current_day);
-            if (nextDate <= currentDate) {
-                runningBalance += itemAmount;
+            if (nextDate.toDateString() === currentDate.toDateString()) {
+                hasBillOrIncome = true; // Mark that there is a bill/income on this day
+                runningBalance += itemAmount; // Adjust the balance with the bill or income
             }
 
             if (item.frequency === "one-time") {
@@ -297,8 +292,11 @@ function calculateBalanceForDate(current_day, month, year, initialBalance) {
         }
     });
 
-    return runningBalance; // Return the cumulative balance up to the given date
+    return hasBillOrIncome ? runningBalance : runningBalance; // Return the running balance even if there are no bills/income
 }
+
+
+
 
 
 

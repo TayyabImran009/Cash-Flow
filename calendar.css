@@ -120,3 +120,33 @@
 .today {
   border: 1px solid rgb(0 38 255)
 }
+
+
+@media screen and (max-width: 540px) {
+  .day{
+    font-size: 12px;
+    min-height: 27px;
+  }
+}
+
+@media screen and (max-width: 457px) {
+  .day{
+    font-size: 12px;
+    min-height: 19px;
+    padding: 8px;
+  }
+}
+
+@media screen and (max-width: 417px) {
+  .day{
+    font-size: 11px;
+    padding: 5px;
+  }
+}
+
+@media screen and (max-width: 351px) {
+  .day{
+    font-size: 9px;
+    padding: 4px;
+  }
+}
