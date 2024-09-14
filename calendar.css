@@ -109,16 +109,16 @@
 }
 
 .red-dot {
-  background-color: red;
+  color: red;
 }
 
 .green-dot {
-  background-color: green;
+  color: green;
 }
 
 
 .today {
-  border: 1px solid rgb(0 38 255)
+  background-color: rgb(0 38 255);
 }
 
 

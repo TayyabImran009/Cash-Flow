@@ -24,7 +24,6 @@ let date = new Date();
 let currentMonth = date.getMonth();
 let currentYear = date.getFullYear();
 
-// Function to display calendar
 // Function to display the calendar
 function displayCalendar(month, year) {
     calendarDays.innerHTML = ""; // Clear previous days
@@ -53,32 +52,40 @@ function displayCalendar(month, year) {
         const day = document.createElement("div");
         day.classList.add("day");
 
-        // Calculate the running balance for the specific day
-        runningBalance = calculateBalanceForDate(i, month, year, runningBalance);
+        const currentDate = new Date(year, month, i);
+        let dayBalance = getTotalRunningBalance(currentDate)
 
         // Determine the class for the balance dot based on whether the balance is positive or negative
         let balanceDotClass = "";
-        if (runningBalance < 0) {
+        if (dayBalance < 0) {
             balanceDotClass = "red-dot"; // Class for red dot (negative balance)
-        } else if (runningBalance > 0) {
+        } else if (dayBalance > 0) {
             balanceDotClass = "green-dot"; // Class for green dot (positive balance)
         }
 
-        // Only show the dot if there is a balance
-        const balanceDot = (runningBalance !== 0)
-            ? `<div class="balance-dot ${balanceDotClass}"></div>`
-            : '';
-
-        // Create the inner HTML with the running balance
+        // Only show the dot if there is a balance (i.e., a bill on this day)
+        const balanceDot = `<div class="balance-dot today"></div>`
+        // Create the inner HTML with the running balance for the day
         day.innerHTML = `
             <span>${i}</span>
             ${balanceDot}
             <br>
-            <span>$${runningBalance.toFixed(2)}</span>
+            <span class="${balanceDotClass}">$${dayBalance}</span>
         `;
 
         if (isCurrentMonth && i === currentDay) {
-            day.classList.add("today"); // Add the 'today' class
+            day.innerHTML = `
+            <span>${i}</span>
+            ${balanceDot}
+            <br>
+            <span class="${balanceDotClass}">$${dayBalance}</span>
+        `;
+        }else{
+            day.innerHTML = `
+            <span>${i}</span>
+            <br>
+            <span class="${balanceDotClass}">$${dayBalance}</span>
+        `;
         }
 
         day.addEventListener("click", () => {
@@ -89,6 +96,109 @@ function displayCalendar(month, year) {
         calendarDays.appendChild(day);
     }
 }
+
+
+function getTotalRunningBalance(selectedDate) {
+    calendar_bill_list.innerHTML = ""; // Clear previous bills
+
+    const selectedDateString = selectedDate.toISOString().split('T')[0];
+    const allOccurrences = [];
+    let modifiedOccurrences = JSON.parse(localStorage.getItem("modifiedOccurrences")) || [];
+    const billsIncomeList = JSON.parse(localStorage.getItem("billsIncomeList")) || [];
+    const permanentDelete = JSON.parse(localStorage.getItem("permanentDelete")) || []; // Fetch permanentDelete list
+    let totalRunningBalance = 0
+
+    // Convert string dates to Date objects for modified occurrences
+    modifiedOccurrences = modifiedOccurrences.map(item => ({
+        ...item,
+        date: new Date(item.date)
+    }));
+
+    const fiftyYearsFromNow = new Date();
+    fiftyYearsFromNow.setFullYear(fiftyYearsFromNow.getFullYear() + 10);
+
+    let initialBalance = parseFloat(localStorage.getItem("balance")) || 0; // Starting balance
+    let runningBalance = initialBalance; // Initialize running balance with saved balance
+
+    // Gather all occurrences based on the frequency of each item
+    billsIncomeList.forEach(item => {
+        let dateParts = item.form_selected_date.split('-');
+        let year = parseInt(dateParts[0], 10);
+        let month = parseInt(dateParts[1], 10) - 1;
+        let day = parseInt(dateParts[2], 10);
+
+        let nextDate = new Date(year, month, day);
+
+        while (nextDate <= fiftyYearsFromNow && nextDate !== null) {
+            const occurrenceId = `${item.id}-${nextDate.getTime()}`;
+            const modifiedItem = modifiedOccurrences.find(mod => mod.occurrenceId === occurrenceId);
+
+            // Check if the occurrence is in the permanentDelete list or paid list and skip it if found
+            if (permanentDelete.includes(occurrenceId) || (item.paid && item.paid.includes(occurrenceId))) {
+                nextDate = getNextOccurrenceDate(nextDate, item.frequency, item.form_selected_date);
+                continue; // Skip this occurrence if it's in permanentDelete or paid
+            }
+
+            if (modifiedItem) {
+                allOccurrences.push(modifiedItem);
+            } else {
+                if (!item.paid || !item.paid.includes(occurrenceId)) {
+                    allOccurrences.push({
+                        id: item.id,
+                        occurrenceId: occurrenceId,
+                        name: item.name,
+                        type: item.type,
+                        amount: item.amount,
+                        date: new Date(nextDate),
+                        frequency: item.frequency
+                    });
+                }
+            }
+
+            if (item.frequency === "one-time") {
+                break;
+            }
+
+            nextDate = getNextOccurrenceDate(nextDate, item.frequency, item.form_selected_date);
+        }
+    });
+
+    // Sort occurrences by date so we can calculate the balance progressively
+    allOccurrences.sort((a, b) => new Date(a.date) - new Date(b.date));
+
+    // Calculate running balance up to the selected date (but not beyond)
+    allOccurrences.forEach(item => {
+        const itemDate = new Date(item.date).toISOString().split('T')[0];
+        if (itemDate < selectedDateString) {
+
+            const itemAmount = item.type === "income" ? item.amount : -item.amount;
+            runningBalance += itemAmount;
+        }
+    });
+
+    // Filter occurrences by selected date
+    const billsForSelectedDate = allOccurrences.filter(item => {
+        const itemDate = new Date(item.date).toISOString().split('T')[0];
+        return itemDate === selectedDateString;
+    });
+
+    if (billsForSelectedDate.length === 0) {
+        return 0
+    } else {
+        // Now display the bills for the selected date
+        billsForSelectedDate.forEach(item => {
+            // First, update the running balance before showing the bill
+            const itemAmount = item.type === "income" ? item.amount : -item.amount;
+            runningBalance += itemAmount
+
+            totalRunningBalance = runningBalance
+        });
+    }
+
+    return totalRunningBalance
+}
+
+
 
 function displayBillsForDate(selectedDate) {
     calendar_bill_list.innerHTML = ""; // Clear previous bills
@@ -238,143 +348,6 @@ todayBtn.addEventListener("click", () => {
 
 // Initial render
 displayCalendar(currentMonth, currentYear);
-
-
-function calculateBalanceForDate(current_day, month, year, runningBalance) {
-    let hasBillOrIncome = false; // Track if there are any bills or incomes for the day
-    const fiftyYearsFromNow = new Date();
-    fiftyYearsFromNow.setFullYear(fiftyYearsFromNow.getFullYear() + 10);
-
-    let modifiedOccurrences = JSON.parse(localStorage.getItem("modifiedOccurrences")) || [];
-    const permanentDelete = JSON.parse(localStorage.getItem("permanentDelete")) || []; // Fetch permanentDelete list
-
-    // Convert string dates to Date objects
-    modifiedOccurrences = modifiedOccurrences.map(item => ({
-        ...item,
-        date: new Date(item.date)
-    }));
-
-    // Process all bills in the billsIncomeList
-    billsIncomeList.forEach(item => {
-        let dateParts = item.form_selected_date.split('-');
-        let billYear = parseInt(dateParts[0], 10);
-        let billMonth = parseInt(dateParts[1], 10) - 1;
-        let billDay = parseInt(dateParts[2], 10);
-
-        let nextDate = new Date(billYear, billMonth, billDay);
-
-        // Loop through each occurrence of the bill/income until the end date
-        while (nextDate <= fiftyYearsFromNow && nextDate !== null) {
-            const occurrenceId = `${item.id}-${nextDate.getTime()}`;
-            const modifiedItem = modifiedOccurrences.find(mod => mod.occurrenceId === occurrenceId);
-
-            // Skip occurrences that are in permanentDelete or paid
-            if (permanentDelete.includes(occurrenceId) || (item.paid && item.paid.includes(occurrenceId))) {
-                nextDate = getNextOccurrenceDate(nextDate, item.frequency, item.form_selected_date);
-                continue;
-            }
-
-            const itemAmount = item.type === "income" ? item.amount : -item.amount;
-
-            // Only include occurrences on the current day
-            const currentDate = new Date(year, month, current_day);
-            if (nextDate.toDateString() === currentDate.toDateString()) {
-                hasBillOrIncome = true; // Mark that there is a bill/income on this day
-                runningBalance += itemAmount; // Adjust the balance with the bill or income
-            }
-
-            if (item.frequency === "one-time") {
-                break; // Only one occurrence for one-time bills
-            }
-
-            // Get the next occurrence date based on the frequency of the item
-            nextDate = getNextOccurrenceDate(nextDate, item.frequency, item.form_selected_date);
-        }
-    });
-
-    return hasBillOrIncome ? runningBalance : runningBalance; // Return the running balance even if there are no bills/income
-}
-
-
-
-
-
-
-function calculateTotalAmountForSpecificDate(current_day, daysInMonth, month, year) {
-    const targetDateString = new Date(year, month, current_day);
-    const endDate = new Date(year, month, daysInMonth);
-    const allOccurrences = [];
-    const fiftyYearsFromNow = new Date();
-    fiftyYearsFromNow.setFullYear(fiftyYearsFromNow.getFullYear() + 10);
-    let runningBalance = 0;
-    let modifiedOccurrences = JSON.parse(localStorage.getItem("modifiedOccurrences")) || [];
-    const permanentDelete = JSON.parse(localStorage.getItem("permanentDelete")) || []; // Fetch permanentDelete list
-
-    // Convert string dates to Date objects
-    modifiedOccurrences = modifiedOccurrences.map(item => ({
-        ...item,
-        date: new Date(item.date)
-    }));
-
-    billsIncomeList.forEach(item => {
-        let dateParts = item.form_selected_date.split('-');
-        let billYear = parseInt(dateParts[0], 10);
-        let billMonth = parseInt(dateParts[1], 10) - 1;
-        let billDay = parseInt(dateParts[2], 10);
-
-        let nextDate = new Date(billYear, billMonth, billDay);
-
-        while (nextDate <= fiftyYearsFromNow && nextDate !== null) {
-            const occurrenceId = `${item.id}-${nextDate.getTime()}`;
-            const modifiedItem = modifiedOccurrences.find(mod => mod.occurrenceId === occurrenceId);
-
-            // Check if the occurrence is in the permanentDelete list or paid list and skip it if found
-            if (permanentDelete.includes(occurrenceId) || (item.paid && item.paid.includes(occurrenceId))) {
-                nextDate = getNextOccurrenceDate(nextDate, item.frequency, item.form_selected_date);
-                continue; // Skip this occurrence if it's in permanentDelete or paid
-            }
-
-            if (modifiedItem) {
-                allOccurrences.push(modifiedItem);
-            } else {
-                if (!item.paid || !item.paid.includes(occurrenceId)) {
-                    allOccurrences.push({
-                        id: item.id,
-                        occurrenceId: occurrenceId,
-                        name: item.name,
-                        type: item.type,
-                        amount: item.amount,
-                        date: new Date(nextDate),
-                        frequency: item.frequency
-                    });
-                }
-            }
-
-            if (item.frequency === "one-time") {
-                break; // Only one occurrence for one-time bills
-            }
-
-            // Get the next occurrence date based on the frequency of the item
-            nextDate = getNextOccurrenceDate(nextDate, item.frequency, item.form_selected_date);
-        }
-    });
-
-    allOccurrences.sort((a, b) => a.date - b.date);
-
-    allOccurrences.forEach(item => {
-        const itemDate = new Date(item.date);
-        const itemDay = itemDate.getDate();
-        const itemMonth = itemDate.getMonth();
-        const itemYear = itemDate.getFullYear();
-
-        // Check if the item falls on the exact target day
-        if (itemDay == current_day && itemMonth == month && itemYear == year) {
-            runningBalance += item.amount;
-        }
-    });
-
-    return runningBalance;
-}
 
 
 
