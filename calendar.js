@@ -191,7 +191,7 @@ function getTotalRunningBalance(selectedDate) {
             const itemAmount = item.type === "income" ? item.amount : -item.amount;
             runningBalance += itemAmount
 
-            totalRunningBalance = runningBalance
+            totalRunningBalance = runningBalance.toFixed(2)
         });
     }
 
