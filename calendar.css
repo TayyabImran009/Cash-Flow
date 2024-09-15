@@ -146,14 +146,6 @@
 
 @media screen and (max-width: 499px) {
   .day {
-    font-size: 10px;
-    padding: 2px;
-  }
-}
-
-@media screen and (max-width: 415px) {
-
-  .day {
     font-size: 11px;
     padding: 2px;
   }
