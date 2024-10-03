@@ -287,6 +287,12 @@ main {
     font-weight: 600; /* Bolder font weight for bill names */
 }
 
+/* History Ttile */
+#history {
+    padding: 20px;
+}
+
+
 /* Bills & Income Section */
 #bills-income {
     background-color: #f8f8f8; /* Light grey background */
@@ -494,7 +500,7 @@ main {
 }
 
 #clear-history-btn {
-    background-color: #007bff; /* Nice blue color */
+    background-color: #444444; /* Dark grey, same as Paid button */
     color: white; /* White text */
     border: none;
     padding: 10px 20px;
@@ -506,7 +512,7 @@ main {
 }
 
 #clear-history-btn:hover {
-    background-color: #0056b3; /* Darker blue on hover */
+    background-color: #333333; /* Darker grey on hover */
     transform: translateY(-2px); /* Slight lift effect on hover */
 }
 
@@ -614,3 +620,115 @@ main {
     opacity: 0;
     transition: right 0.4s ease, opacity 0.4s ease;
 } */
+
+.nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 60px; /* Adjust width as needed */
+    margin: 0 10px; /* Space between items */
+}
+
+.nav-item i {
+    font-size: 40px; /* Icon size */
+    display: block;
+}
+
+.nav-item span {
+    font-size: 12px; /* Title font size */
+    text-align: center;
+    margin-top: 5px; /* Space between icon and title */
+}
+
+
+/* Bottom Navigation Menu */
+.bottom-nav {
+    visibility: visible !important;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    background-color: #f1f1f1;
+    z-index: 1000;
+    border-top: 1px solid #ccc;
+    padding: 10px 0;
+    opacity: 1; /* Ensure the nav is fully visible */
+}
+
+.bottom-nav ul {
+    display: flex;
+    justify-content: space-around;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.bottom-nav li {
+    text-align: center;
+}
+
+.bottom-nav a {
+    text-decoration: none;
+    color: #333;
+    font-size: 14px;
+}
+
+.bottom-nav i {
+    display: block;
+    margin-bottom: 5px;
+}
+
+
+
+
+/* Ensure the main content has enough space to not overlap with the nav */
+main {
+    padding-bottom: 60px; /* Adjust this to give enough room for the bottom nav */
+}
+
+#backup-btn, 
+#restore-input {
+    width: 100%; /* Ensure both elements take the full width */
+    padding: 10px; /* Add padding for a consistent look */
+    margin-top: 10px; /* Add some space between the button and the input */
+    border-radius: 4px; /* Add rounded corners for consistency */
+    box-sizing: border-box; /* Ensure padding is included in the width */
+}
+
+#backup-btn {
+    background-color: #444444; /* Button background color */
+    color: white; /* Button text color */
+    border: none; /* Remove border */
+    cursor: pointer;
+}
+
+#backup-btn:hover {
+    background-color: #333333; /* Slightly darker background on hover */
+}
+
+#restore-input {
+    border: 1px solid #cccccc; /* Add a border to match the input field */
+    background-color: #f8f8f8; /* Light background for the input */
+}
+
+#loadingSpinner {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 9999; /* Ensure it's on top of other elements */
+}
+
+.spinner {
+  border: 8px solid #f3f3f3;
+  border-top: 8px solid #3498db;
+  border-radius: 50%;
+  width: 60px;
+  height: 60px;
+  animation: spin 2s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+

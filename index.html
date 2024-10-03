@@ -46,19 +46,6 @@
 </head>
 
 <body>
-    <header>
-        <nav>
-            <ul>
-                <li><a href="#" id="forecast-link"><i class="fa-solid fa-file-invoice-dollar" style="font-size: 40px;"></i></a></li>
-                <li><a href="#" id="bills-income-link"><i class="fa-solid fa-file-invoice" style="font-size: 40px;"></i></a></li>
-                <li><a href="#" id="history-link"><i class="fa-solid fa-clock-rotate-left" style="font-size: 40px;"></i></a></li>
-                <li><a href="#" id="calendar-link"><i class="fa-solid fa-calendar-days" style="font-size: 40px;"></i></a></li>
-                <li><a href="#" id="account-link"><i class="fa-solid fa-arrow-up-from-bracket" style="font-size: 40px;"></i></a></li>
-            </ul>
-        </nav>
-    </header>
-
-
     <script>
         document.addEventListener("DOMContentLoaded", function () {
             const balanceInput = document.getElementById("balance-input");
@@ -72,6 +59,10 @@
         });
     </script>
 
+    <div id="loadingSpinner" style="display:none;">
+        <div class="spinner"></div>
+    </div>
+
     <main>
         <!-- Forecast Section -->
         <section id="forecast" class="section">
@@ -83,7 +74,7 @@
                     <option value=12>1 Year</option>
                     <option value=36>3 Year</option>
                     <option value=60>5 Year</option>
-                    <option value=120>10 Year</option>
+                    <!--  <option value=120>10 Year</option> -->
                 </select>
                 <span class="balance-text">Forecast: <span id="final-balance-amount">$0.00</span>
             </div>
@@ -154,7 +145,7 @@
             <br>
             <h3>Remember to backup your data. If you clear your browser data or cache it will clear the database.</h3>
             <button id="backup-btn">Backup Data</button>
-            <input type="file" id="restore-input" accept=".json" style="width: 94%;">
+            <input type="file" id="restore-input" accept=".json">
             <br>
             <div id="restore-success-message" style="display: none; color: green; font-weight: bold; margin-top: 10px;">
                 Successful Restore!
@@ -189,8 +180,49 @@
             </div>
         </section>
     </main>
+
+    <body>
+    <main>
+        <!-- Your existing sections (Forecast, Bills & Income, etc.) -->
+    </main>
+
+    <!-- Move the navigation outside of header and to the bottom of the body -->
+    <nav class="bottom-nav">
+        <ul>
+            <li class="nav-item">
+                <a href="#" id="forecast-link">
+                    <i class="fa-solid fa-file-invoice-dollar" style="font-size: 30px;"></i>
+                </a>
+                <span>Forecast</span>
+            </li>
+            <li class="nav-item">
+                <a href="#" id="bills-income-link">
+                    <i class="fa-solid fa-file-invoice" style="font-size: 30px;"></i>
+                </a>
+                <span>Bills</span>
+            </li>
+            <li class="nav-item">
+                <a href="#" id="history-link">
+                    <i class="fa-solid fa-clock-rotate-left" style="font-size: 30px;"></i>
+                </a>
+                <span>History</span>
+            </li>
+            <li class="nav-item">
+                <a href="#" id="calendar-link">
+                    <i class="fa-solid fa-calendar-days" style="font-size: 30px;"></i>
+                </a>
+                <span>Calendar</span>
+            </li>
+            <li class="nav-item">
+                <a href="#" id="account-link">
+                    <i class="fa-solid fa-arrow-up-from-bracket" style="font-size: 30px;"></i>
+                </a>
+                <span>Account</span>
+            </li>
+        </ul>
+    </nav>
+
     <script src="app.js"></script>
     <script src="calendar.js"></script>
 </body>
-
 </html>

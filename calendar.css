@@ -34,21 +34,35 @@
 }
 
 .calendar-nav button {
-  background-color: #007bff;
+  background-color: #444444; /* Dark grey, same as the Paid button */
   border: none;
   color: white;
-  padding: 8px 16px;
+  padding: 6px 10px; /* Reduced padding for smaller buttons */
   border-radius: 5px;
   cursor: pointer;
+  margin: 0 10px; /* This adds space between the arrows and the month text */ 
+  height: 40px; /* Ensure buttons have a consistent height */
+
+
+}
+
+.calendar-nav button:hover {
+  background-color: #333333; /* Darker grey on hover */
 }
 
 .calendar-nav #today-btn {
   margin-left: auto;
+  padding: 6px 12px;  /* Slightly larger than before but not too big */
+  font-size: 1em;     /* Keep the font size reasonable */
+  border-radius: 5px; /* Slightly larger border-radius for a smoother look */
 }
+
 
 .calendar-nav h2 {
   margin: 0;
-  font-size: 1.2em;
+  font-size: 1.2em;    
+  line-height: 1; /* Ensures consistent line height */
+  line-height: 40px; /* Matches the height of the buttons */
 }
 
 .calendar-grid {
@@ -63,6 +77,7 @@
   padding: 10px;
   background-color: #f4f4f4;
   border-radius: 5px;
+  font-weight: bold; /* Make balance bold */
 }
 
 .day-label {
@@ -111,10 +126,23 @@
 
 .red-dot {
   color: red;
+  font-weight: bold; /* Make balance bold */
+
 }
 
 .green-dot {
   color: green;
+  font-weight: bold; /* Make balance bold */
+
+}
+
+.red-dot,
+.green-dot {
+    font-weight: bold; /* Make the text bold */
+    transform: rotate(-0deg); /* Rotate the text by 45 degrees */
+    display: inline-block; /* Ensure the rotation applies properly */
+    margin-bottom: -30; /* Remove any bottom margin that might be pushing it down */
+
 }
 
 
